@@ -1,5 +1,6 @@
 #include "polynomial.hpp"
 #include <stdexcept>
+#include <cassert>
 
 using namespace std;
 
@@ -86,6 +87,15 @@ Polynomial<T> Polynomial<T>::operator%(const Polynomial<T>& other) const {
 }
 
 template <typename T>
+Polynomial<T> Polynomial<T>::operator-() const {
+    std::vector<T> resultCoefficients(coefficients.size());
+    for (size_t i = 0; i < coefficients.size(); ++i) {
+        resultCoefficients[i] = -coefficients[i];
+    }
+    return Polynomial<T>(resultCoefficients);
+}
+
+template <typename T>
 Polynomial<T>& Polynomial<T>::operator+=(const Polynomial<T>& other) {
     *this = *this + other;
     return *this;
@@ -127,6 +137,29 @@ T Polynomial<T>::operator()(const T& x) const {
 }
 
 template <typename T>
+T Polynomial<T>::operator[](uint i) const {
+    assert (i < coefficients.size());
+    return coefficients[i];
+}
+
+template <typename T>
+bool Polynomial<T>::operator==(const Polynomial<T>& other) const
+{
+    for (size_t i = 0; i < coefficients.size(); ++i) {
+        if (coefficients[i] != other.coefficients[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template <typename T>
+bool Polynomial<T>::operator!=(const Polynomial<T>& other) const
+{
+    return !(*this == other);
+}
+
+template <typename T>
 void Polynomial<T>::removeLeadingZeros() {
     while (!coefficients.empty() && coefficients.back() == T(0)) {
         coefficients.pop_back();
@@ -141,23 +174,47 @@ void Polynomial<T>::divide(const Polynomial<T>& other, Polynomial<T>& quotient, 
     if (coefficients.size() < other.coefficients.size()) {
         quotient = Polynomial<T>();
         remainder = *this;
+        remainder.removeLeadingZeros();
         return;
     }
-    std::vector<T> resultCoefficients(coefficients.size() - other.coefficients.size() + 1);
-    Polynomial<T> current = *this;
-    for (size_t i = resultCoefficients.size(); i-- > 0;) {
-        T factor = current.coefficients.back() / other.coefficients.back();
-        resultCoefficients[i] = factor;
-        std::vector<T> subtractCoefficients(i + other.coefficients.size());
-        subtractCoefficients[i] = factor;
-        Polynomial<T> subtract(subtractCoefficients);
-        current -= subtract * other;
-        current.removeLeadingZeros();
+
+    Polynomial<T> temp = *this;
+
+    T factor = temp.coefficients.back() / other.coefficients.back();
+    if (factor != 0)
+    {   
+        for (int i = 0; i < other.coefficients.size(); i ++)
+        {
+            temp.coefficients[temp.coefficients.size() - (i+1)] -= factor * other.coefficients[other.coefficients.size() - (i+1)];
+        }
     }
-    quotient = Polynomial<T>(resultCoefficients);
-    quotient.removeLeadingZeros();
-    remainder = current;
+    temp.coefficients.pop_back();
+
+    temp.divide(other, quotient, remainder);
+    quotient.coefficients.push_back(factor);
 }
+
+template <typename T>
+ostream& operator<< (ostream& os, const Polynomial<T>& p) {
+    if (p.coefficients.empty()) {
+        os << "0";
+        return os;
+    }
+    else {
+        for (int i = p.getDegree(); i >= 0; --i) {
+            if (i == 0) {
+                os << p.coefficients[i];
+            }
+            else {
+                os << p.coefficients[i] << " X^" << i << " + ";
+            }
+        }
+        return os;
+    }
+}
+
+
 
 #include <mcl/bls12_381.hpp>
 template class Polynomial<mcl::bn::Fr>;
+template ostream& operator<< (ostream& os, const Polynomial<mcl::bn::Fr>& p);
