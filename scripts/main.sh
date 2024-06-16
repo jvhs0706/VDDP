@@ -2,4 +2,4 @@ cd ../build
 cmake ..
 make
 cd ./src
-./vdp_main 10
+./vdp_main 10240

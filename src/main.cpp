@@ -4,49 +4,46 @@ using namespace std;
 using namespace mcl::bn;
 
 #include "polynomial.hpp"
-#include "poly-commit.hpp"
+#include "proof.hpp"
 #include "timer.hpp"
-
-Polynomial<Fr> randomPolynomial(uint deg) {
-    vector<Fr> coefs;
-    for (int i = 0; i < deg + 1; i++) {
-        Fr c;
-        c.setByCSPRNG();
-        coefs.push_back(c);
-    }
-    return coefs;
-}
 
 int main(int argc, char** argv) {
     initPairing(mcl::BLS12_381);
 
-    G1 P;
-    const char *g1Str = "1 0x17f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb 0x08b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e1";
-    P.setStr(g1Str);
-
-    Fr fg, fh;
-    fg.setByCSPRNG();
-    fh.setByCSPRNG();
-    auto g = P * fg;
-    auto h = P * fh;
-
-    cout << g << endl;
-    cout << g * (-1) << endl;
-    cout << g + g * (-1) << endl;
-    cout << h << endl;
-
     uint deg = stoi(argv[1]);
-    auto pp = trustedSetup(g, h, deg);
-    
-    Polynomial<Fr> p1 = randomPolynomial(deg);
-    Polynomial<Fr> p2 = randomPolynomial(deg);
+    const auto pp = trustedSetup(deg);
+    const auto& gVec = pp.gVec;
+    const auto& hVec = pp.hVec;
+    const auto& g2 = pp.g2;
+    const auto& g2_tau = pp.g2_tau;
 
-    auto com = commitPoly(p1, p2, pp.first, pp.second);
-    cout << com << endl;
+    Polynomial<Fr> F = randomPolynomial(deg);
+    auto com_F = commitPoly(F, gVec);
 
-    Fr y;
-    Fr x = 114514;
-    provePolyEval(p1, x, y, pp.first);
+    Fr x, rx, y, ry;
+    x.setByCSPRNG();
+    rx.setByCSPRNG();
+    y = F(x);
+    ry.setByCSPRNG();
+    const auto& g = gVec[0];
+
+    const auto& h = hVec[0];
+    auto com_x = g * x + h * rx;
+    auto com_y = g * y + h * ry;
+
+    Timer ptimer, vtimer;
+    bool accepted = SecretEval(y, ry, x, rx, F, com_y, com_x, com_F, pp, ptimer, vtimer);
+
+    cout << "Accepted: " << accepted << endl;
+    cout << "Proving time: " << ptimer.getTotalTime() << " s" << endl;
+    cout << "Verification time: " << vtimer.getTotalTime() << " s" << endl;
+
+    // Fr temp = getRootOfUnity(8);
+    // Fr temp2;
+    // Fr::pow(temp2, temp, 255);
+    // cout << temp2 << endl;
+    // Fr::pow(temp2, temp, 256);
+    // cout << temp2 << endl;
 
     return 0;
 }
