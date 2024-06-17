@@ -1,4 +1,5 @@
 #include "proof.hpp"
+#include "utils.hpp"
 using namespace std;
 using namespace mcl::bn;
 
@@ -170,15 +171,7 @@ bool SecretEval(const Fr& y, const Fr& ry, const Fr& x, const Fr& rx, const Poly
     return accepted;
 }
 
-Polynomial<Fr> randomPolynomial(uint deg) {
-    vector<Fr> coefs;
-    for (int i = 0; i < deg + 1; i++) {
-        Fr c;
-        c.setByCSPRNG();
-        coefs.push_back(c);
-    }
-    return coefs;
-}
+
 
 bool Prod(const Fr& z, const Fr& r_z, const Fr& x, const Fr& r_x, const Fr& y, const Fr& r_y,
     const G1& com_z, const G1& com_x, const G1& com_y, const G1& g, const G1& h,
@@ -221,16 +214,3 @@ bool Prod(const Fr& z, const Fr& r_z, const Fr& x, const Fr& r_x, const Fr& y, c
 
 }
 
-Fr getRootOfUnity(uint logN)
-{
-    if (logN == 0) return 1; // X - 1
-    else {
-        Fr omega = -1; // X^2 - 1
-        for (uint i = 2; i <= logN; ++i)
-        {
-            auto b = Fr::squareRoot(omega, omega);
-            assert(b);
-        }
-        return omega;
-    }
-}

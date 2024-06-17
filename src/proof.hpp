@@ -42,8 +42,6 @@ bool Prod(const Fr& z, const Fr& r_z, const Fr& x, const Fr& r_x, const Fr& y, c
     const G1& com_x, const G1& com_y, const G1& com_z, const G1& g, const G1& h,
     Timer& ptimer, Timer& vtimer);
 
-Polynomial<Fr> randomPolynomial(uint deg);
 
-Fr getRootOfUnity(uint n);
 
 #endif // PROOF_HPP

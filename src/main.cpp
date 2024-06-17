@@ -3,47 +3,45 @@
 using namespace std;
 using namespace mcl::bn;
 
+#include "utils.hpp"
 #include "polynomial.hpp"
 #include "proof.hpp"
 #include "timer.hpp"
+#include "vrr.hpp"
 
 int main(int argc, char** argv) {
     initPairing(mcl::BLS12_381);
+    // initialize the random seed
+    srand(time(NULL));
 
-    uint deg = stoi(argv[1]);
-    const auto pp = trustedSetup(deg);
-    const auto& gVec = pp.gVec;
-    const auto& hVec = pp.hVec;
-    const auto& g2 = pp.g2;
-    const auto& g2_tau = pp.g2_tau;
+    uint num_class = 8;
+    uint omega_size = 64;
+    uint B = 3;
+    uint A = omega_size - (num_class - 1) * B;
+    auto vrrpp = VRRTrustedSetup(num_class, A, B);
 
-    Polynomial<Fr> F = randomPolynomial(deg);
-    auto com_F = commitPoly(F, gVec);
+    // random integer in [0, num_class)
+    uint ix = rand() % num_class;
+    // random inter in [0, omega_size)
+    uint is = rand() % omega_size;
 
-    Fr x, rx, y, ry;
-    x.setByCSPRNG();
+    Fr rx, rs;
     rx.setByCSPRNG();
-    y = F(x);
-    ry.setByCSPRNG();
-    const auto& g = gVec[0];
+    rs.setByCSPRNG();
 
-    const auto& h = hVec[0];
-    auto com_x = g * x + h * rx;
-    auto com_y = g * y + h * ry;
+    auto com = VRRCommit(ix, is, rx, rs, vrrpp);
+    auto& comx = com.first;
+    auto& coms = com.second;
+
+    uint ir = rand() % omega_size;
+    auto y = VRRCompute(ix, is, ir, vrrpp);
+
+    cout << y << endl;
 
     Timer ptimer, vtimer;
-    bool accepted = SecretEval(y, ry, x, rx, F, com_y, com_x, com_F, pp, ptimer, vtimer);
 
-    cout << "Accepted: " << accepted << endl;
-    cout << "Proving time: " << ptimer.getTotalTime() << " s" << endl;
-    cout << "Verification time: " << vtimer.getTotalTime() << " s" << endl;
+    bool res = VRR(ix, is, rx, rs, comx, coms, y, ir, vrrpp, ptimer, vtimer);
 
-    // Fr temp = getRootOfUnity(8);
-    // Fr temp2;
-    // Fr::pow(temp2, temp, 255);
-    // cout << temp2 << endl;
-    // Fr::pow(temp2, temp, 256);
-    // cout << temp2 << endl;
 
     return 0;
 }
