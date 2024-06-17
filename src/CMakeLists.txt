@@ -1,7 +1,7 @@
 aux_source_directory(. LIB_SRC)
-list(FILTER LIB_SRC EXCLUDE REGEX "main*")
+list(FILTER LIB_SRC EXCLUDE REGEX "main-*.cpp")
 
-add_library(vdp_lib ${LIB_SRC})
+add_library(vrr_lib vrr.hpp vrr.cpp)
 
-add_executable(vdp_main main.cpp)
-target_link_libraries(vdp_main vdp_lib mcl mclbn384_256)
+add_executable(vrr main-vrr.cpp)
+target_link_libraries(vrr vrr_lib vdp_lib mcl mclbn384_256)

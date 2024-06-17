@@ -61,7 +61,7 @@ Polynomial<T> Polynomial<T>::operator-(const Polynomial<T>& other) const {
 
 template <typename T>
 Polynomial<T> Polynomial<T>::operator*(const Polynomial<T>& other) const {
-    std::vector<T> resultCoefficients(coefficients.size() + other.coefficients.size() - 1);
+    std::vector<T> resultCoefficients(coefficients.size() + other.coefficients.size() - 1, T(0));
     for (size_t i = 0; i < coefficients.size(); ++i) {
         for (size_t j = 0; j < other.coefficients.size(); ++j) {
             resultCoefficients[i + j] += coefficients[i] * other.coefficients[j];
@@ -171,27 +171,36 @@ void Polynomial<T>::divide(const Polynomial<T>& other, Polynomial<T>& quotient, 
     if (other.coefficients.empty()) {
         throw std::invalid_argument("Division by zero");
     }
-    if (coefficients.size() < other.coefficients.size()) {
+    else if (other.coefficients.size() == 1){
+        for (int i = 0; i < coefficients.size(); i++)
+        {
+            quotient.coefficients.push_back(coefficients[i] / other.coefficients[0]);
+        }
+        remainder = Polynomial<T>();
+        return;
+    }
+    else if (coefficients.size() < other.coefficients.size()) {
         quotient = Polynomial<T>();
         remainder = *this;
         remainder.removeLeadingZeros();
         return;
     }
+    else{
+        Polynomial<T> temp = *this;
 
-    Polynomial<T> temp = *this;
-
-    T factor = temp.coefficients.back() / other.coefficients.back();
-    if (factor != 0)
-    {   
-        for (int i = 0; i < other.coefficients.size(); i ++)
-        {
-            temp.coefficients[temp.coefficients.size() - (i+1)] -= factor * other.coefficients[other.coefficients.size() - (i+1)];
+        T factor = temp.coefficients.back() / other.coefficients.back();
+        if (factor != 0)
+        {   
+            for (int i = 0; i < other.coefficients.size(); i ++)
+            {
+                temp.coefficients[temp.coefficients.size() - (i+1)] -= factor * other.coefficients[other.coefficients.size() - (i+1)];
+            }
         }
-    }
-    temp.coefficients.pop_back();
+        temp.coefficients.pop_back();
 
-    temp.divide(other, quotient, remainder);
-    quotient.coefficients.push_back(factor);
+        temp.divide(other, quotient, remainder);
+        quotient.coefficients.push_back(factor);
+    }
 }
 
 template <typename T>

@@ -17,7 +17,6 @@ VRRPubParam VRRTrustedSetup(uint num_class, uint A, uint B)
     Fr x_power = 1;
     for (uint i = 0; i < num_class; i++)
     {   
-        cout << x_power << endl;
         uint num = (i == 0) ? A : B;
         vector<Fr> temp((i == 0) ? A : B, x_power);
         F_distribution.insert(F_distribution.end(), temp.begin(), temp.end());
@@ -27,13 +26,7 @@ VRRPubParam VRRTrustedSetup(uint num_class, uint A, uint B)
 
     Fr omega_gen;
     Polynomial<Fr> F = ntt(F_distribution, omega_gen, true);
-    cout << "omega_gen = " << omega_gen << endl;
-    Fr omega_gen_power;
-    Fr::pow(omega_gen_power, omega_gen, omega_size);
-    cout << "omega_gen_power = " << omega_gen_power << endl;
-    cout << "F[1] = "<< F[1] << endl;
-    cout << "F(1) = " << F(1) << endl;
-    cout << "F(omega_gen) = " << F(omega_gen) << endl;
+    Fr omega_power = 1;
     
     vector<Fr> F_omega_params(omega_size + 1, Fr(0));
     F_omega_params[0] = - 1;
@@ -73,13 +66,50 @@ bool VRR(const uint ix, const uint is, const Fr& rx, const Fr& rs,
     const G1& comx, const G1& coms, const Fr& y, const uint ir, 
     const VRRPubParam& vrrpp, Timer &ptimer, Timer &vtimer)
 {
+    bool accepted = true;
     vtimer.start();
     Fr y_pow;
     Fr::pow(y_pow, y, vrrpp.num_class);
-    cout << y_pow << endl;
-    assert (y_pow == 1);
+    accepted = accepted && (y_pow == 1);
     vtimer.stop();
 
-    return true;
+    ptimer.start();
+    auto it = (is + ir) % vrrpp.omega_size;
+    Fr t;
+    Fr::pow(t, vrrpp.omega_gen, it);
+    vtimer.start();
+    Fr r;
+    Fr::pow(r, vrrpp.omega_gen, ir);
+    auto comt = coms * r;
+    vtimer.stop();
+    auto rt = rs * r;
+    auto z = vrrpp.F(t);
+    Fr rz;
+    rz.setByCSPRNG();
+    auto comz = vrrpp.pp.gVec[0] * z + vrrpp.pp.hVec[0] * rz;
+    ptimer.stop();
+
+    vtimer.start();
+    Fr alpha;
+    alpha.setByCSPRNG();
+    vtimer.stop();
+
+    ptimer.start();
+    auto F_new = vrrpp.F + vrrpp.F_omega * alpha;
+    auto com_F_new = vrrpp.com_F + vrrpp.com_F_omega * alpha;
+
+
+    accepted &= SecretEval(z, rz, t, rt, F_new, comz, comt, com_F_new, vrrpp.pp, ptimer, vtimer);
+    auto& g = vrrpp.pp.gVec[0];
+    auto& h = vrrpp.pp.hVec[0];
+    ptimer.start();
+    Fr x;
+    Fr::pow(x, vrrpp.x_gen, ix);
+    ptimer.stop();
+
+    accepted &= Prod(y, 0, z, rz, x, rx, 
+        g * y, comz, comx, g, h, ptimer, vtimer);
+
+    return accepted;
 
 }
