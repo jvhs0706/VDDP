@@ -33,12 +33,7 @@ do
         do
             for num_class in 2 4 8 16 32 64 128
             do
-                # if the followings return 1, break
                 python scripts/vrr.py --eps $eps --log_prec $log_prec --num_class $num_class
-                if [ $? -eq 1 ]
-                then
-                    break
-                fi  
             done
         done
     done
