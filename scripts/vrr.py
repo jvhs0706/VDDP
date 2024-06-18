@@ -14,7 +14,8 @@ def get_vrr_params(eps: float, log_prec: int, num_class: int):
     assert log_prec > 0 and num_class > 1
     Omega = 1 << log_prec
     B_ = Omega / (math.exp(eps) + num_class - 1)
-    B = math.floor(B_)
+    B = round(B_)
+    assert isinstance(B, int)
     A = Omega - (num_class - 1) * B
     return Omega, A, B, math.log(A / B)
     

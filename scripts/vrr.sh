@@ -42,4 +42,6 @@ do
             done
         done
     done
+    python scripts/vrrplot.py # plot the results up to the current repeat
 done 
+
