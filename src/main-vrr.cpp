@@ -52,11 +52,11 @@ int main(int argc, char** argv) {
 
     assert(VRR(ix, is, rx, rs, comx, coms, y, ir, vrrpp, ptimer, vtimer));
 
-    cout << "Setup time: " << setup_timer.getTotalTime() << " s\n";
-    cout << "Commitment generation time: " << committing_timer.getTotalTime() << " s\n";
-    cout << "Computation time: " << computing_timer.getTotalTime() << " s\n";
-    cout << "Proof generation time: " << ptimer.getTotalTime() << " s\n";
-    cout << "Verification time: " << vtimer.getTotalTime() << " s\n";
+    cout << "Setting time: " << setup_timer.getTotalTime() << " s\n";
+    cout << "Committing time: " << committing_timer.getTotalTime() << " s\n";
+    cout << "Computing time: " << computing_timer.getTotalTime() << " s\n";
+    cout << "Proving time: " << ptimer.getTotalTime() << " s\n";
+    cout << "Verifying time: " << vtimer.getTotalTime() << " s\n";
 
 
     return 0;
