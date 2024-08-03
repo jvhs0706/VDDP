@@ -14,4 +14,9 @@ vector<bool> probToBits(double p, uint n);
 
 vector<bool> sampleBernoulli(const vector<vector<bool>>& r_vec, uint len, double p, uint prec);
 
+vector<uint> sampleGeometric(const vector<vector<vector<bool>>>& r_vec, uint len, double p, uint log_range, uint prec);
+
+vector<int> sampleLaplacian(const vector<vector<bool>>& r1, const vector<vector<vector<bool>>>& r2, const vector<bool>& r3,
+    uint len, double t, uint log_range, uint prec);
+
 #endif // VDLP_HPP

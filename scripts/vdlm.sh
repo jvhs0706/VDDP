@@ -5,4 +5,4 @@ cmake ..
 make
 cd ..
 
-./build/src/vdlm 1048576 0.9 16
+./build/src/vdlm 65536 1.0 4 16

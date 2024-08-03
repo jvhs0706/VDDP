@@ -1,5 +1,6 @@
 #include "vdlm.hpp"
 #include <execution>
+#include <cmath>
 
 vector<bool> probToBits(double p, uint n)
 {
@@ -24,6 +25,11 @@ vector<bool> probToBits(double p, uint n)
 vector<bool> sampleBernoulli(const vector<vector<bool>>& r_vec, uint len, double p, uint prec)
 {
     auto p_bits = probToBits(p, prec);
+    // for (uint i = 0; i < prec; ++ i)
+    // {
+    //     cout << p_bits[i] << " ";
+    // }
+    // cout << endl;
     vector<bool> res(len, true);
 
     // assert (r_vec.size() == prec);
@@ -51,4 +57,68 @@ vector<bool> sampleBernoulli(const vector<vector<bool>>& r_vec, uint len, double
         );
     }
     return res;
+}
+
+vector<uint> sampleGeometric(const vector<vector<vector<bool>>>& r_vec, uint len, double p, uint log_range, uint prec)
+{   
+    vector<uint> res(len, 0);
+    auto* res_begin = &res.front();
+
+    if (r_vec.size() != log_range) throw invalid_argument("r_vec.size() != log_range");
+
+    for (uint i = 0; i < log_range; ++ i)
+    {
+        double p_pow_inv = pow(p, -static_cast<double>(1 << i));
+        double q = 1.0 / (1.0 + p_pow_inv);
+        // cout << "p_pow_inv = " << p_pow_inv << endl;
+        // cout << "q = " << q << endl;
+        auto r = sampleBernoulli(r_vec[i], len, q, prec);
+
+        // for (uint j = 0; j < len; ++ j)
+        // {
+        //     cout << r[j] << " ";
+        // }
+        // cout << endl;
+
+        for_each(
+            std::execution::par,
+            res.begin(),
+            res.end(),
+            [&](uint& j)
+            {
+                auto idx = &j - res_begin;
+                if (r[idx]) j |= (1 << i);
+            }
+        );
+    }
+    return res;
+}
+
+vector<int> sampleLaplacian(const vector<vector<bool>>& r1, const vector<vector<vector<bool>>>& r2, const vector<bool>& r3,
+    uint len, double t, uint log_range, uint prec)
+{   
+    double p0 = 0.5; // change this later!!!!!!!!!!!!!!
+    double p = exp(-1.0/t);
+    auto b = sampleBernoulli(r1, len, p0, prec);
+    auto x = sampleGeometric(r2, len, 0.5, log_range, prec);
+    auto& s= r3;
+
+    vector<int> res(len, 0);
+
+    auto* res_begin = &res.front();
+
+    for_each(
+        std::execution::par,
+        res.begin(),
+        res.end(),
+        [&](int& j)
+        {
+            auto idx = &j - res_begin;
+            int t = b[idx] ? 0 : (x[idx] + 1); 
+            j = s[idx] ? t : -t;
+        }
+    );
+    
+
+    return res;    
 }

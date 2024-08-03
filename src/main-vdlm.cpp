@@ -16,38 +16,51 @@ int main(int argc, char** argv) {
     srand(time(NULL));
 
     uint len = stoi(argv[1]);
-    double prob = stod(argv[2]);
-    uint prec = stoi(argv[3]);
+    double t = stod(argv[2]);
+    uint log_range = stoi(argv[3]);
+    uint prec = stoi(argv[4]);
 
     // test the LegendrePRF function
 
-    vector<vector<bool>> r_vec;
+    vector<vector<bool>> r1;
+    vector<vector<vector<bool>>> r2(log_range);
 
     Timer timer;
 
     timer.start();
     Fr key;
-    for (uint i = 0; i < prec; ++ i)
+
+    for (uint j = 0; j < prec; ++ j)
     {
         key.setByCSPRNG();
-        r_vec.push_back(LegendrePRNG(key, len));
+        r1.push_back(LegendrePRNG(key, len));
     }
+
+    for (uint i = 0; i < log_range; ++ i)
+    {
+        for (uint j = 0; j < prec; ++ j)
+        {
+            key.setByCSPRNG();
+            r2[i].push_back(LegendrePRNG(key, len));
+        }
+    }
+
+    key.setByCSPRNG();
+    vector<bool> r3 = LegendrePRNG(key, len);
+
     timer.stop();
     cout << "PRNG time = " << timer.getTotalTime() << " s" << endl;
     timer.reset();
 
-    
     timer.start();
-    auto res = sampleBernoulli(r_vec, len, prob, prec);
+    auto res = sampleLaplacian(r1, r2, r3, len, t, log_range, prec);
     timer.stop();
-    cout << "bernoulli time = " << timer.getTotalTime() << " s" << endl;
+    cout << "Laplacian time = " << timer.getTotalTime() << " s" << endl;
 
-    int res_sum = 0;
-    for (uint i = 0; i < len; ++ i)
-    {
-        res_sum += res[i];
-    }
-
+    // for (uint i = 0; i < len; ++ i)
+    // {
+    //     cout << res[i] << " ";
+    // }
 
     return 0;
 }
