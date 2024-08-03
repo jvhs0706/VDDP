@@ -1,4 +1,5 @@
 #include "vdlm.hpp"
+#include <execution>
 
 vector<bool> probToBits(double p, uint n)
 {
@@ -28,17 +29,26 @@ vector<bool> sampleBernoulli(const vector<vector<bool>>& r_vec, uint len, double
     // assert (r_vec.size() == prec);
     if (r_vec.size() != prec) throw invalid_argument("r_vec.size() != prec");
 
+    vector<uint> idx(len);
+    auto* idx_begin = &idx.front();
+
     for (int i = prec - 1; i >= 0; -- i)
     {
         auto& r = r_vec[i];
         // assert (r.size() == len);
         if (r.size() != len) throw invalid_argument("r.size() != len");
-        for (uint j = 0; j < len; ++ j)
-        {
-            auto t = p_bits[i] != r[j];
-            res[j] = t ? !r[j] : res[j];
-        }
-        
+
+        for_each(
+            std::execution::par,
+            idx.begin(),
+            idx.end(),
+            [&](uint& j)
+            {
+                j = &j - idx_begin;
+                auto t = p_bits[i] != r[j];
+                res[j] = t ? !r[j] : res[j];
+            }
+        );
     }
     return res;
 }

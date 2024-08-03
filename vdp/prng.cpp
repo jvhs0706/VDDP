@@ -34,22 +34,5 @@ vector<bool> LegendrePRNG(const Fr& key, uint len)
             res[item] = LegendrePRF(item, key);
         }
     );
-    // )
-    // #pragma omp parallel for
-    // for (uint i = 0; i < len; ++ i)
-    // {
-    //     res[i] = LegendrePRF(i, key);
-    // }
-
-    // std::vector<std::string> foo;
-    // std::for_each(
-    // std::execution::par,
-    // foo.begin(),
-    // foo.end(),
-    // [](auto&& item)
-    // {
-    //     //do stuff with item
-    // });
-
     return res;
 }
