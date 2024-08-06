@@ -32,9 +32,9 @@ void convertLegendrePRNG(const vector<Fr>& rt_vec, const vector<bool>& res, Poly
 
 void commitLegendrePRNG(const Polynomial& F_rt, const Polynomial& F_res, const Polynomial& R_rt, const Polynomial& R_res, G1& com_rt, G1& com_res, const LegendrePRNGPubParam& pp);
 
-bool proveLegendrePRNG(const Fr& key, const vector<Fr>& rt_vec, const vector<bool>& res, 
-    const Fr& r_key, const Polynomial& R_rt, const Polynomial& R_res,
-    const G1& com_key, const G1& com_rt, const G1& com_res, 
-    const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer);
+// bool proveLegendrePRNG(const Fr& key, const vector<Fr>& rt_vec, const vector<bool>& res, 
+//     const Fr& r_key, const Polynomial& R_rt, const Polynomial& R_res,
+//     const G1& com_key, const G1& com_rt, const G1& com_res, 
+//     const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer);
 
 #endif // PRNG_HPP

@@ -7,6 +7,7 @@
 #SBATCH --job-name=shilishanlu
 #SBATCH --output=logs/vrr-%N-%j.out
 #SBATCH --error=logs/vrr-%N-%j.err
+#SBATCH --exclude=snorlax-[1,3]
 
 #SBATCH --mail-user=haochen.sun@uwaterloo.ca
 #SBATCH --mail-type=ALL

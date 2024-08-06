@@ -25,7 +25,7 @@ VRRPubParam VRRTrustedSetup(uint num_class, uint A, uint B)
     assert (F_distribution.size() == omega_size);
 
     Fr omega_gen;
-    Polynomial F = ntt(F_distribution, omega_gen, true);
+    Polynomial F = ntt_vec_to_poly(F_distribution, omega_gen);
     // Fr omega_power = 1;
     
     vector<Fr> F_omega_params(omega_size + 1, Fr(0));

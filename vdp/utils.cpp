@@ -19,8 +19,7 @@ Fr getRootOfUnity(uint logN)
         Fr omega = -1; // X^2 - 1
         for (uint i = 2; i <= logN; ++i)
         {
-            auto b = Fr::squareRoot(omega, omega);
-            assert(b);
+            assert(Fr::squareRoot(omega, omega));
         }
         return omega;
     }
@@ -60,19 +59,19 @@ vector<Fr> ntt_helper(const vector<Fr>& n, const Fr& omega)
     return transformed;
 }
 
-Polynomial ntt(const vector<Fr>& n, Fr& omega, bool inverse)
+Polynomial ntt_vec_to_poly(const vector<Fr>& n, Fr& omega)
 {
     omega = getRootOfUnity(ceilLog2(n.size()));
     auto transformed = ntt_helper(n, omega);
     Polynomial out(transformed);
-    if (inverse) out /= Fr(n.size());
+    out /= Fr(n.size());
     return out;
 }
 
-Polynomial ntt_given_omega(const vector<Fr>& a, const Fr& omega, bool inverse)
+Polynomial ntt_vec_to_poly_given_omega(const vector<Fr>& a, const Fr& omega)
 {
     auto transformed = ntt_helper(a, omega);
     Polynomial out(transformed);
-    if (inverse) out /= Fr(a.size());
+    out /= Fr(a.size());
     return out;
 }

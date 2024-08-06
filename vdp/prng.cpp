@@ -10,7 +10,7 @@ LegendrePRNGPubParam LegendrePRNGTrustedSetup(uint len)
     
     auto pp = trustedSetup(len + 1);
     Fr omega_gen;
-    Polynomial F_range = ntt(arange(len), omega_gen, true);
+    Polynomial F_range = ntt_vec_to_poly(arange(len), omega_gen);
     
     vector<Fr> F_omega_params(len + 1, Fr(0));
     F_omega_params[0] = - 1;
@@ -67,8 +67,8 @@ vector<bool> LegendrePRNG(const Fr& key, uint len, vector<Fr>& rt_vec)
 
 void convertLegendrePRNG(const vector<Fr>& rt_vec, const vector<bool>& res, Polynomial& F_rt, Polynomial& F_res, const LegendrePRNGPubParam& pp)
 {
-    F_rt = ntt_given_omega(rt_vec, pp.omega_gen, true);
-    F_res = ntt_given_omega(vector<Fr>(res.begin(), res.end()), pp.omega_gen, true);
+    F_rt = ntt_vec_to_poly_given_omega(rt_vec, pp.omega_gen);
+    F_res = ntt_vec_to_poly_given_omega(vector<Fr>(res.begin(), res.end()), pp.omega_gen);
 }
 
 void commitLegendrePRNG(const Polynomial& F_rt, const Polynomial& F_res, const Polynomial& R_rt, const Polynomial& R_res, G1& com_rt, G1& com_res, const LegendrePRNGPubParam& pp)
@@ -77,10 +77,11 @@ void commitLegendrePRNG(const Polynomial& F_rt, const Polynomial& F_res, const P
     com_res = commitPoly(F_res, R_res, pp.pp.gVec, pp.pp.hVec);
 }
 
-bool proveLegendrePRNG(const Fr& key, const vector<Fr>& rt_vec, const vector<bool>& res, 
-    const Fr& r_key, const Polynomial& R_rt, const Polynomial& R_res,
-    const G1& com_key, const G1& com_rt, const G1& com_res, 
-    const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer)
-{   
-    return true;
-}
+// (5-4 res ) * input == sqare(rt)
+// bool proveLegendrePRNG(const Fr& key, const vector<Fr>& rt_vec, const vector<bool>& res, 
+//     const Fr& r_key, const Polynomial& R_rt, const Polynomial& R_res,
+//     const G1& com_key, const G1& com_rt, const G1& com_res, 
+//     const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer)
+// {   
+//     return true;
+// }
