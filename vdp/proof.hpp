@@ -18,14 +18,14 @@ struct PubParam {
 
 PubParam trustedSetup(uint maxDeg);
 
-G1 commitPoly(const Polynomial<Fr>& F, const vector<G1>& gVec);
+G1 commitPoly(const Polynomial& F, const vector<G1>& gVec);
 
-G1 commitPoly(const Polynomial<Fr>& F, const Polynomial<Fr>& R, const vector<G1>& gVec, const vector<G1>& hVec);
+G1 commitPoly(const Polynomial& F, const Polynomial& R, const vector<G1>& gVec, const vector<G1>& hVec);
 
-G1 provePolyEval(const Polynomial<Fr>& F, 
+G1 provePolyEval(const Polynomial& F, 
     const Fr& x, Fr& y, const vector<G1>& gVec);
 
-G1 provePolyEval(const Polynomial<Fr>& F, const Polynomial<Fr>& R, 
+G1 provePolyEval(const Polynomial& F, const Polynomial& R, 
     const Fr& x, 
     Fr& yF, Fr& yR,
     const vector<G1>& gVec, const vector<G1>& hVec);
@@ -34,7 +34,7 @@ bool verifyPolyEval(const Fr& yF, const Fr& yR, const G1& proof, const G1& commi
 
 bool verifyPolyEval(const Fr& y, const G1& proof, const G1& commitment, const Fr& x, const G1& g, const G2& g2, const G2& g2_tau);
 
-bool SecretEval(const Fr& y, const Fr& ry, const Fr& x, const Fr& rx, const Polynomial<Fr>& F, 
+bool SecretEval(const Fr& y, const Fr& ry, const Fr& x, const Fr& rx, const Polynomial& F, 
     const G1& com_y, const G1& com_x, const G1& com_F, 
     const PubParam& pp, Timer& ptimer, Timer& vtimer);
 

@@ -17,8 +17,8 @@ struct VRRPubParam
     PubParam pp;
     Fr x_gen;
     Fr omega_gen;
-    Polynomial<Fr> F;
-    Polynomial<Fr> F_omega;
+    Polynomial F;
+    Polynomial F_omega;
     G1 com_F;
     G1 com_F_omega; 
 };

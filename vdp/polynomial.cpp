@@ -4,131 +4,113 @@
 
 using namespace std;
 
-template <typename T>
-Polynomial<T>::Polynomial() : coefficients() {}
+Polynomial::Polynomial() : coefficients() {}
 
-template <typename T>
-Polynomial<T>::Polynomial(const T& constant) : coefficients({constant}) {
+Polynomial::Polynomial(const Fr& constant) : coefficients({constant}) {
     removeLeadingZeros();
 }
 
-template <typename T>
-Polynomial<T>::Polynomial(const std::vector<T>& coefficients) : coefficients(coefficients) {
+Polynomial::Polynomial(const std::vector<Fr>& coefficients) : coefficients(coefficients) {
     removeLeadingZeros();
 }
 
-template <typename T>
-Polynomial<T>::Polynomial(const Polynomial<T>& other) : coefficients(other.coefficients) {
+Polynomial::Polynomial(const Polynomial& other) : coefficients(other.coefficients) {
     removeLeadingZeros();
 }
 
-template <typename T>
-int Polynomial<T>::getDegree() const {
+int Polynomial::getDegree() const {
     return (signed) coefficients.size() - 1;
 }
 
-template <typename T>
-Polynomial<T>& Polynomial<T>::operator=(const Polynomial<T>& other) {
+Polynomial& Polynomial::operator=(const Polynomial& other) {
     coefficients = other.coefficients;
     return *this;
 }
 
-template <typename T>
-Polynomial<T> Polynomial<T>::operator+(const Polynomial<T>& other) const {
-    std::vector<T> resultCoefficients(std::max(coefficients.size(), other.coefficients.size()));
+Polynomial Polynomial::operator+(const Polynomial& other) const {
+    std::vector<Fr> resultCoefficients(std::max(coefficients.size(), other.coefficients.size()));
     for (size_t i = 0; i < resultCoefficients.size(); ++i) {
-        T a = (i < coefficients.size()) ? coefficients[i] : T(0);
-        T b = (i < other.coefficients.size()) ? other.coefficients[i] : T(0);
+        Fr a = (i < coefficients.size()) ? coefficients[i] : Fr(0);
+        Fr b = (i < other.coefficients.size()) ? other.coefficients[i] : Fr(0);
         resultCoefficients[i] = a + b;
     }
-    Polynomial<T> out(resultCoefficients);
+    Polynomial out(resultCoefficients);
     out.removeLeadingZeros();
     return out;
 }
 
-template <typename T>
-Polynomial<T> Polynomial<T>::operator-(const Polynomial<T>& other) const {
-    std::vector<T> resultCoefficients(std::max(coefficients.size(), other.coefficients.size()));
+Polynomial Polynomial::operator-(const Polynomial& other) const {
+    std::vector<Fr> resultCoefficients(std::max(coefficients.size(), other.coefficients.size()));
     for (auto i = 0; i < resultCoefficients.size(); ++i) {
-        T a = (i < coefficients.size()) ? coefficients[i] : T(0);
-        T b = (i < other.coefficients.size()) ? other.coefficients[i] : T(0);
+        Fr a = (i < coefficients.size()) ? coefficients[i] : Fr(0);
+        Fr b = (i < other.coefficients.size()) ? other.coefficients[i] : Fr(0);
         resultCoefficients[i] = a - b;
     }
-    Polynomial<T> out(resultCoefficients);
+    Polynomial out(resultCoefficients);
     out.removeLeadingZeros();
     return out;
 }
 
-template <typename T>
-Polynomial<T> Polynomial<T>::operator*(const Polynomial<T>& other) const {
-    std::vector<T> resultCoefficients(coefficients.size() + other.coefficients.size() - 1, T(0));
+Polynomial Polynomial::operator*(const Polynomial& other) const {
+    std::vector<Fr> resultCoefficients(coefficients.size() + other.coefficients.size() - 1, Fr(0));
     for (size_t i = 0; i < coefficients.size(); ++i) {
         for (size_t j = 0; j < other.coefficients.size(); ++j) {
             resultCoefficients[i + j] += coefficients[i] * other.coefficients[j];
         }
     }
-    Polynomial<T> out(resultCoefficients);
+    Polynomial out(resultCoefficients);
     out.removeLeadingZeros();
     return out;
 }
 
-template <typename T>
-Polynomial<T> Polynomial<T>::operator/(const Polynomial<T>& other) const {
-    Polynomial<T> quotient, remainder;
+Polynomial Polynomial::operator/(const Polynomial& other) const {
+    Polynomial quotient, remainder;
     divide(other, quotient, remainder);
     return quotient;
 }
 
-template <typename T>
-Polynomial<T> Polynomial<T>::operator%(const Polynomial<T>& other) const {
-    Polynomial<T> quotient, remainder;
+Polynomial Polynomial::operator%(const Polynomial& other) const {
+    Polynomial quotient, remainder;
     divide(other, quotient, remainder);
     return remainder;
 }
 
-template <typename T>
-Polynomial<T> Polynomial<T>::operator-() const {
-    std::vector<T> resultCoefficients(coefficients.size());
+Polynomial Polynomial::operator-() const {
+    std::vector<Fr> resultCoefficients(coefficients.size());
     for (size_t i = 0; i < coefficients.size(); ++i) {
         resultCoefficients[i] = -coefficients[i];
     }
-    return Polynomial<T>(resultCoefficients);
+    return Polynomial(resultCoefficients);
 }
 
-template <typename T>
-Polynomial<T>& Polynomial<T>::operator+=(const Polynomial<T>& other) {
+Polynomial& Polynomial::operator+=(const Polynomial& other) {
     *this = *this + other;
     return *this;
 }
 
-template <typename T>
-Polynomial<T>& Polynomial<T>::operator-=(const Polynomial<T>& other) {
+Polynomial& Polynomial::operator-=(const Polynomial& other) {
     *this = *this - other;
     return *this;
 }
 
-template <typename T>
-Polynomial<T>& Polynomial<T>::operator*=(const Polynomial<T>& other) {
+Polynomial& Polynomial::operator*=(const Polynomial& other) {
     *this = *this * other;
     return *this;
 }
 
-template <typename T>
-Polynomial<T>& Polynomial<T>::operator/=(const Polynomial<T>& other) {
+Polynomial& Polynomial::operator/=(const Polynomial& other) {
     *this = *this / other;
     return *this;
 }
 
-template <typename T>
-Polynomial<T>& Polynomial<T>::operator%=(const Polynomial<T>& other) {
+Polynomial& Polynomial::operator%=(const Polynomial& other) {
     *this = *this % other;
     return *this;
 }
 
-template <typename T>
-T Polynomial<T>::operator()(const T& x) const {
-    T result = T(0);
-    T xPower = T(1);
+Fr Polynomial::operator()(const Fr& x) const {
+    Fr result = Fr(0);
+    Fr xPower = Fr(1);
     for (size_t i = 0; i < coefficients.size(); ++i) {
         result += coefficients[i] * xPower;
         xPower *= x;
@@ -136,14 +118,12 @@ T Polynomial<T>::operator()(const T& x) const {
     return result;
 }
 
-template <typename T>
-T Polynomial<T>::operator[](uint i) const {
+Fr Polynomial::operator[](uint i) const {
     assert (i < coefficients.size());
     return coefficients[i];
 }
 
-template <typename T>
-bool Polynomial<T>::operator==(const Polynomial<T>& other) const
+bool Polynomial::operator==(const Polynomial& other) const
 {
     for (size_t i = 0; i < coefficients.size(); ++i) {
         if (coefficients[i] != other.coefficients[i]) {
@@ -153,21 +133,18 @@ bool Polynomial<T>::operator==(const Polynomial<T>& other) const
     return true;
 }
 
-template <typename T>
-bool Polynomial<T>::operator!=(const Polynomial<T>& other) const
+bool Polynomial::operator!=(const Polynomial& other) const
 {
     return !(*this == other);
 }
 
-template <typename T>
-void Polynomial<T>::removeLeadingZeros() {
-    while (!coefficients.empty() && coefficients.back() == T(0)) {
+void Polynomial::removeLeadingZeros() {
+    while (!coefficients.empty() && coefficients.back() == Fr(0)) {
         coefficients.pop_back();
     }
 }
 
-template <typename T>
-void Polynomial<T>::divide(const Polynomial<T>& other, Polynomial<T>& quotient, Polynomial<T>& remainder) const {
+void Polynomial::divide(const Polynomial& other, Polynomial& quotient, Polynomial& remainder) const {
     if (other.coefficients.empty()) {
         throw std::invalid_argument("Division by zero");
     }
@@ -176,19 +153,19 @@ void Polynomial<T>::divide(const Polynomial<T>& other, Polynomial<T>& quotient, 
         {
             quotient.coefficients.push_back(coefficients[i] / other.coefficients[0]);
         }
-        remainder = Polynomial<T>();
+        remainder = Polynomial();
         return;
     }
     else if (coefficients.size() < other.coefficients.size()) {
-        quotient = Polynomial<T>();
+        quotient = Polynomial();
         remainder = *this;
         remainder.removeLeadingZeros();
         return;
     }
     else{
-        Polynomial<T> temp = *this;
+        Polynomial temp = *this;
 
-        T factor = temp.coefficients.back() / other.coefficients.back();
+        Fr factor = temp.coefficients.back() / other.coefficients.back();
         if (factor != 0)
         {   
             for (int i = 0; i < other.coefficients.size(); i ++)
@@ -203,8 +180,7 @@ void Polynomial<T>::divide(const Polynomial<T>& other, Polynomial<T>& quotient, 
     }
 }
 
-template <typename T>
-ostream& operator<< (ostream& os, const Polynomial<T>& p) {
+ostream& operator<< (ostream& os, const Polynomial& p) {
     if (p.coefficients.empty()) {
         os << "0";
         return os;
@@ -221,9 +197,3 @@ ostream& operator<< (ostream& os, const Polynomial<T>& p) {
         return os;
     }
 }
-
-
-
-#include <mcl/bls12_381.hpp>
-template class Polynomial<mcl::bn::Fr>;
-template ostream& operator<< (ostream& os, const Polynomial<mcl::bn::Fr>& p);

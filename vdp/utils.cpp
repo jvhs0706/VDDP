@@ -2,7 +2,7 @@
 using namespace std;
 using namespace mcl::bn;
 
-Polynomial<Fr> randomPolynomial(uint deg) {
+Polynomial randomPolynomial(uint deg) {
     vector<Fr> coefs;
     for (int i = 0; i < deg + 1; i++) {
         Fr c;
@@ -60,11 +60,19 @@ vector<Fr> ntt_helper(const vector<Fr>& n, const Fr& omega)
     return transformed;
 }
 
-Polynomial<Fr> ntt(const vector<Fr>& n, Fr& omega, bool inverse)
+Polynomial ntt(const vector<Fr>& n, Fr& omega, bool inverse)
 {
     omega = getRootOfUnity(ceilLog2(n.size()));
     auto transformed = ntt_helper(n, omega);
-    Polynomial<Fr> out(transformed);
+    Polynomial out(transformed);
     if (inverse) out /= Fr(n.size());
+    return out;
+}
+
+Polynomial ntt_given_omega(const vector<Fr>& a, const Fr& omega, bool inverse)
+{
+    auto transformed = ntt_helper(a, omega);
+    Polynomial out(transformed);
+    if (inverse) out /= Fr(a.size());
     return out;
 }

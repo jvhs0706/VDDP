@@ -36,7 +36,7 @@ PubParam trustedSetup(uint maxDeg)
     return {gVec, hVec, g2, g2_tau};
 }
 
-G1 commitPoly(const Polynomial<Fr>& F, const std::vector<G1>& gVec)
+G1 commitPoly(const Polynomial& F, const std::vector<G1>& gVec)
 {
     assert(F.getDegree() >= 0);
     assert(F.getDegree() < gVec.size());
@@ -50,7 +50,7 @@ G1 commitPoly(const Polynomial<Fr>& F, const std::vector<G1>& gVec)
 
 }
 
-G1 commitPoly(const Polynomial<Fr>& F, const Polynomial<Fr>& R, const std::vector<G1>& gVec, const std::vector<G1>& hVec)
+G1 commitPoly(const Polynomial& F, const Polynomial& R, const std::vector<G1>& gVec, const std::vector<G1>& hVec)
 {
     assert(F.getDegree() >= 0);
     assert(F.getDegree() < gVec.size());
@@ -70,22 +70,22 @@ G1 commitPoly(const Polynomial<Fr>& F, const Polynomial<Fr>& R, const std::vecto
 }
 
 
-mcl::bn::G1 provePolyEval(const Polynomial<mcl::bn::Fr>& F, 
+mcl::bn::G1 provePolyEval(const Polynomial& F, 
     const mcl::bn::Fr& x, mcl::bn::Fr& y, const std::vector<mcl::bn::G1>& gVec)
 {
     y = F(x);
-    auto diff = Polynomial<Fr>({-x, 1});
+    auto diff = Polynomial({-x, 1});
     return commitPoly((F - y) / diff, gVec);
 }
 
-mcl::bn::G1 provePolyEval(const Polynomial<mcl::bn::Fr>& F, const Polynomial<mcl::bn::Fr>& R, 
+mcl::bn::G1 provePolyEval(const Polynomial& F, const Polynomial& R, 
     const mcl::bn::Fr& x, 
     mcl::bn::Fr& yF, mcl::bn::Fr& yR,
     const std::vector<mcl::bn::G1>& gVec, const std::vector<mcl::bn::G1>& hVec)
 {
     yF = F(x);
     yR = R(x);
-    auto diff = Polynomial<Fr>({-x, 1});
+    auto diff = Polynomial({-x, 1});
     return commitPoly((F - yF) / diff, (R - yR) / diff, gVec, hVec);
 }
 
@@ -111,7 +111,7 @@ bool verifyPolyEval(const Fr& y, const G1& proof, const G1& commitment, const Fr
     return l == r;
 }
 
-bool SecretEval(const Fr& y, const Fr& ry, const Fr& x, const Fr& rx, const Polynomial<Fr>& F, 
+bool SecretEval(const Fr& y, const Fr& ry, const Fr& x, const Fr& rx, const Polynomial& F, 
     const G1& com_y, const G1& com_x, const G1& com_F, 
     const PubParam& pp, Timer& ptimer, Timer& vtimer)
 {
@@ -129,7 +129,7 @@ bool SecretEval(const Fr& y, const Fr& ry, const Fr& x, const Fr& rx, const Poly
     assert(com_y == g * y + h * ry);
 
     ptimer.start();
-    auto diff = Polynomial<Fr>({x, -1});
+    auto diff = Polynomial({x, -1});
     auto F_ = (-F + y) / diff;
     auto R_F_ = randomPolynomial(gVec.size() - 1);
     auto com_F_ = commitPoly(F_, R_F_, gVec, hVec);
@@ -213,4 +213,3 @@ bool Prod(const Fr& z, const Fr& r_z, const Fr& x, const Fr& r_x, const Fr& y, c
     return accepted;
 
 }
-

@@ -25,13 +25,13 @@ VRRPubParam VRRTrustedSetup(uint num_class, uint A, uint B)
     assert (F_distribution.size() == omega_size);
 
     Fr omega_gen;
-    Polynomial<Fr> F = ntt(F_distribution, omega_gen, true);
-    Fr omega_power = 1;
+    Polynomial F = ntt(F_distribution, omega_gen, true);
+    // Fr omega_power = 1;
     
     vector<Fr> F_omega_params(omega_size + 1, Fr(0));
     F_omega_params[0] = - 1;
     F_omega_params[omega_size] = 1;
-    Polynomial<Fr> F_omega(F_omega_params);
+    Polynomial F_omega(F_omega_params);
 
     G1 com_F = commitPoly(F, pp.gVec);
     G1 com_F_omega = commitPoly(F_omega, pp.gVec);

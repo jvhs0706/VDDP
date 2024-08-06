@@ -4,46 +4,47 @@
 #include <vector>
 #include <iostream>
 
-template <typename T>
+#include <mcl/bls12_381.hpp>
+using namespace mcl::bn;
+
 class Polynomial {
-    public:
+public:
     Polynomial();
-    Polynomial(const T& constant);
-    Polynomial(const std::vector<T>& coefficients);
-    Polynomial(const Polynomial<T>& other);
+    Polynomial(const Fr& constant);
+    Polynomial(const std::vector<Fr>& coefficients);
+    Polynomial(const Polynomial& other);
 
     // 0 polynomial -> -1
     // otherwise, the degree of the polynomial
     int getDegree() const;
 
-    Polynomial<T>& operator=(const Polynomial<T>& other);
+    Polynomial& operator=(const Polynomial& other);
 
-    Polynomial<T> operator+(const Polynomial<T>& other) const;
-    Polynomial<T> operator-(const Polynomial<T>& other) const;
-    Polynomial<T> operator*(const Polynomial<T>& other) const;
-    Polynomial<T> operator/(const Polynomial<T>& other) const;
-    Polynomial<T> operator%(const Polynomial<T>& other) const;
+    Polynomial operator+(const Polynomial& other) const;
+    Polynomial operator-(const Polynomial& other) const;
+    Polynomial operator*(const Polynomial& other) const;
+    Polynomial operator/(const Polynomial& other) const;
+    Polynomial operator%(const Polynomial& other) const;
 
-    Polynomial<T> operator-() const;
+    Polynomial operator-() const;
 
-    Polynomial<T>& operator+=(const Polynomial<T>& other);
-    Polynomial<T>& operator-=(const Polynomial<T>& other);
-    Polynomial<T>& operator*=(const Polynomial<T>& other);
-    Polynomial<T>& operator/=(const Polynomial<T>& other);
-    Polynomial<T>& operator%=(const Polynomial<T>& other);
+    Polynomial& operator+=(const Polynomial& other);
+    Polynomial& operator-=(const Polynomial& other);
+    Polynomial& operator*=(const Polynomial& other);
+    Polynomial& operator/=(const Polynomial& other);
+    Polynomial& operator%=(const Polynomial& other);
 
-    bool operator==(const Polynomial<T>& other) const;
-    bool operator!=(const Polynomial<T>& other) const;
-    T operator()(const T& x) const;
-    T operator[](uint i) const;
+    bool operator==(const Polynomial& other) const;
+    bool operator!=(const Polynomial& other) const;
+    Fr operator()(const Fr& x) const;
+    Fr operator[](uint i) const;
 
-    template <typename U>
-    friend std::ostream& operator<<(std::ostream& os, const Polynomial<U>& p);
-    
-    private:
-    std::vector<T> coefficients;
+    friend std::ostream& operator<<(std::ostream& os, const Polynomial& p);
+
+private:
+    std::vector<Fr> coefficients;
     void removeLeadingZeros();
-    void divide(const Polynomial<T>& other, Polynomial<T>& quotient, Polynomial<T>& remainder) const;
+    void divide(const Polynomial& other, Polynomial& quotient, Polynomial& remainder) const;
 };
 
 #endif  // POLYNOMIAL_HPP

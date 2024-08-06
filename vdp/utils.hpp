@@ -8,11 +8,13 @@
 using namespace mcl::bn;
 using namespace std;
 
-Polynomial<Fr> randomPolynomial(uint deg);
+Polynomial randomPolynomial(uint deg);
 
 Fr getRootOfUnity(uint n);
 
-Polynomial<Fr> ntt(const vector<Fr>& a, Fr& omega, bool inverse = true);
+Polynomial ntt(const vector<Fr>& a, Fr& omega, bool inverse = true);
+
+Polynomial ntt_given_omega(const vector<Fr>& a, const Fr& omega, bool inverse = true);
 
 uint ceilLog2(uint n);
 
