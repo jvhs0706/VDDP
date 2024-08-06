@@ -7,10 +7,8 @@
 using namespace std;
 using namespace mcl::bn;
 
-int LegendreSymbol(const Fr& x);
+#define LEGENDRE_PRNG_NON_SQ 5
 
-bool LegendrePRF(const Fr& x, const Fr& key);
-
-vector<bool> LegendrePRNG(const Fr& key, uint len);
+vector<bool> LegendrePRNG(const Fr& key, uint len, vector<Fr>& rt_vec);
 
 #endif // PRNG_HPP

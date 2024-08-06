@@ -1,37 +1,26 @@
 #include "prng.hpp"
 #include <execution>
 
-int LegendreSymbol(const Fr& x)
+vector<bool> LegendrePRNG(const Fr& key, uint len, vector<Fr>& rt_vec)
 {
-    if (x.isZero()) return 0;
-    else 
-    {
-        Fr temp;
-        bool b = Fr::squareRoot(temp, x);
-        if (b) return 1;
-        else return -1;
-    }
-}
+    // if rt_vec.len() != len, then we need to resize rt_vec
+    if (rt_vec.size() != len) rt_vec.resize(len);
+    auto rt_begin = &rt_vec.front();
 
-bool LegendrePRF(const Fr& x, const Fr& key)
-{
-    return LegendreSymbol(x + key) >= 0;
-}
-
-vector<bool> LegendrePRNG(const Fr& key, uint len)
-{
     // generate a random bit string of length len using the LegendrePRF function
-    vector<uint> idx(len);
     vector<bool> res(len);
-    auto* idx_begin = &idx.front();
     for_each(
         std::execution::par,
-        idx.begin(),
-        idx.end(),
-        [&key, &idx_begin, &res](uint& item)
-        {
-            item = &item - idx_begin;
-            res[item] = LegendrePRF(item, key);
+        rt_vec.begin(),
+        rt_vec.end(),
+        [&](Fr& rt)
+        {   
+            auto idx = &rt - rt_begin;
+            Fr temp = idx + key;
+            res[idx] = Fr::squareRoot(rt, temp);
+            if (!res[idx]) {
+                if (!Fr::squareRoot(rt, temp * LEGENDRE_PRNG_NON_SQ)) throw std::runtime_error("ERROR: PRNG is not working correctly!");
+            }
         }
     );
     return res;
