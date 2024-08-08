@@ -47,13 +47,14 @@ public:
     Fr operator()(const Fr& x) const;
     Fr operator[](uint i) const;
 
+    void divide(const Polynomial& other, Polynomial& quotient, Polynomial& remainder) const;
+    void divide(const VanishingPolynomial& other, Polynomial& quotient, Polynomial& remainder) const;
+
     friend std::ostream& operator<<(std::ostream& os, const Polynomial& p);
 
 protected:
     std::vector<Fr> coefficients;
     void removeLeadingZeros();
-    void divide(const Polynomial& other, Polynomial& quotient, Polynomial& remainder) const;
-    void divide(const VanishingPolynomial& other, Polynomial& quotient, Polynomial& remainder) const;
 };
 
 // X^len - 1

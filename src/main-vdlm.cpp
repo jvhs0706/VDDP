@@ -15,13 +15,24 @@ int main(int argc, char** argv) {
     // initialize the random seed
     srand(time(NULL));
 
-    Polynomial F ({1, 9, 2, 6, 0, 8, 1, 7});
-    VanishingPolynomial G (4);
-    Polynomial H ({1, 1, 4, 5, 1, 4});
-    Polynomial R = F * H + G;
+    uint len = stoi(argv[1]);
+    auto pp = LegendrePRNGTrustedSetup(len);
 
-    cout << R / F << endl;
-    cout << R % F << endl;
+    vector<Fr> rt_vec;
+
+    Fr key;
+    key.setByCSPRNG();
+    
+    auto random_bits = LegendrePRNG(key, len, rt_vec);
+    Polynomial F_rt, F_res;
+    convertLegendrePRNG(rt_vec, random_bits, F_rt, F_res, pp);
+
+    Polynomial R_rt = randomPolynomial(len), R_res = randomPolynomial(len);
+    G1 com_rt, com_res;
+    commitLegendrePRNG(F_rt, F_res, R_rt, R_res, com_rt, com_res, pp);
+
+    Timer ptimer, vtimer;
+    Binary(F_res, R_res, len, pp.omega_gen, com_res, pp.pp, ptimer, vtimer); 
 
     return 0;
 }

@@ -171,7 +171,43 @@ bool SecretEval(const Fr& y, const Fr& ry, const Fr& x, const Fr& rx, const Poly
     return accepted;
 }
 
+bool EvalSecret(const Fr& y, const Fr& ry, const Fr& x, // secret y, public x
+    const Polynomial& F, const Polynomial& R, // secret F, R
+    const G1& com_y, const G1& com_F, 
+    const PubParam& pp, Timer& ptimer, Timer& vtimer)
+{
+    bool accepted = true;
 
+    const auto& gVec = pp.gVec;
+    const auto& hVec = pp.hVec;
+    const auto& g2 = pp.g2;
+    const auto& g2_tau = pp.g2_tau;
+    const auto& g = gVec[0];
+    const auto& h = hVec[0];
+
+    assert(y==F(x));
+    assert(com_y == g * y + h * ry);
+
+    ptimer.start();
+    auto F_ = F - y;
+    auto R_ = R - ry;
+    vtimer.start();
+    auto com_F_ = com_F - com_y;
+    vtimer.stop();
+    ptimer.stop();
+
+    Fr y_, r_;
+    ptimer.start();
+    auto proof = provePolyEval(F_, R_, x, y_, r_, gVec, hVec);
+    ptimer.stop();
+
+    vtimer.start();
+    accepted &= y_.isZero();
+    accepted &= verifyPolyEval(y_, r_, proof, com_F_, x, g, h, g2, g2_tau);
+    vtimer.stop();
+
+    return accepted;
+}
 
 bool Prod(const Fr& z, const Fr& r_z, const Fr& x, const Fr& r_x, const Fr& y, const Fr& r_y,
     const G1& com_z, const G1& com_x, const G1& com_y, const G1& g, const G1& h,
@@ -211,5 +247,79 @@ bool Prod(const Fr& z, const Fr& r_z, const Fr& x, const Fr& r_x, const Fr& y, c
     vtimer.stop();
 
     return accepted;
+}
 
+bool Equal(const Fr& x, const Fr& r_x, const Fr& y, const Fr& r_y, 
+    const G1& com_x, const G1& com_y, const G1& g, const G1& h,
+    Timer& ptimer, Timer& vtimer)
+{
+    bool accepted = true;
+
+    ptimer.start();
+    Fr s;
+    s.setByCSPRNG();
+    G1 a = h * s;
+    ptimer.stop();
+
+    vtimer.start();
+    Fr c;
+    c.setByCSPRNG();
+    vtimer.stop();
+
+    ptimer.start();
+    auto z = c * (r_x - r_y) + s;
+    ptimer.stop();
+
+    vtimer.start();
+    accepted &= (h * z == (com_x - com_y) * c + a);
+    vtimer.stop();
+
+    return accepted;
+}
+
+bool Binary(const Polynomial& F, const Polynomial& R, 
+    const uint len, const Fr& omega, 
+    const G1& com_F, const PubParam& pp, 
+    Timer& ptimer, Timer& vtimer)
+{
+    bool accepted = true;
+    ptimer.start();
+    Polynomial zero_poly = F * F - F;
+    VanishingPolynomial V(len);
+    Polynomial F_quot, F_rem;
+    zero_poly.divide(V, F_quot, F_rem);
+    assert (F_rem.getDegree() == -1); // It's the zero polynomial
+    auto R_quot = randomPolynomial(len);
+    auto com_F_quot = commitPoly(F_quot, R_quot, pp.gVec, pp.hVec);
+    ptimer.stop();
+
+    vtimer.start();
+    Fr u;
+    u.setByCSPRNG();
+    vtimer.stop();
+
+    ptimer.start();
+    const auto x = F(u), z_ = F_quot(u), y = V(u); // z = x * y
+    Fr r_x, r_z_;
+    r_x.setByCSPRNG();
+    r_z_.setByCSPRNG();
+    
+    const G1& g = pp.gVec[0];
+    const G1& h = pp.hVec[0];
+    const auto com_x = g * x + h * r_x;
+    const auto com_z_ = g * z_ + h * r_z_;
+    const auto z = z_ * y + x;
+    const auto r_z = r_z_ * y + r_x;
+    const auto com_z = com_z_ * y + com_x;
+    
+    ptimer.stop();
+
+    cout << "Accepted: " << accepted << endl;
+    accepted &= EvalSecret(x, r_x, u, F, R, com_x, com_F, pp, ptimer, vtimer);
+    accepted &= EvalSecret(z_, r_z_, u, F_quot, R_quot, com_z_, com_F_quot, pp, ptimer, vtimer);
+    accepted &= Prod(z, r_z, x, r_x, x, r_x, com_z, com_x, com_x, g, h, ptimer, vtimer);
+
+    cout << "Accepted: " << accepted << endl;
+
+    return accepted;
 }
