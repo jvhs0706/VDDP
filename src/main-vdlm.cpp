@@ -20,19 +20,25 @@ int main(int argc, char** argv) {
 
     vector<Fr> rt_vec;
 
-    Fr key;
+    Fr key, r_key;
     key.setByCSPRNG();
+    r_key.setByCSPRNG();
     
     auto random_bits = LegendrePRNG(key, len, rt_vec);
     Polynomial F_rt, F_res;
     convertLegendrePRNG(rt_vec, random_bits, F_rt, F_res, pp);
 
     Polynomial R_rt = randomPolynomial(len), R_res = randomPolynomial(len);
-    G1 com_rt, com_res;
-    commitLegendrePRNG(F_rt, F_res, R_rt, R_res, com_rt, com_res, pp);
+    G1 com_key, com_rt, com_res;
+    commitLegendrePRNG(key, F_rt, F_res, r_key, R_rt, R_res, com_key, com_rt, com_res, pp);
 
     Timer ptimer, vtimer;
-    Binary(F_res, R_res, len, pp.omega_gen, com_res, pp.pp, ptimer, vtimer); 
+    auto accepted = proveLegendrePRNG(key, F_rt, F_res, 
+        r_key, R_rt, R_res,
+        com_key, com_rt, com_res, 
+        pp, ptimer, vtimer);
+
+    cout << "Accepted: " << accepted << endl;
 
     return 0;
 }

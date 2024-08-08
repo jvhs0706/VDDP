@@ -314,12 +314,9 @@ bool Binary(const Polynomial& F, const Polynomial& R,
     
     ptimer.stop();
 
-    cout << "Accepted: " << accepted << endl;
     accepted &= EvalSecret(x, r_x, u, F, R, com_x, com_F, pp, ptimer, vtimer);
     accepted &= EvalSecret(z_, r_z_, u, F_quot, R_quot, com_z_, com_F_quot, pp, ptimer, vtimer);
     accepted &= Prod(z, r_z, x, r_x, x, r_x, com_z, com_x, com_x, g, h, ptimer, vtimer);
-
-    cout << "Accepted: " << accepted << endl;
 
     return accepted;
 }
