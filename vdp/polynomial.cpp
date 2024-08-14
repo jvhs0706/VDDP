@@ -198,7 +198,7 @@ void Polynomial::divide(const Polynomial& other, Polynomial& quotient, Polynomia
         remainder = *this;
 
         for (int i = this -> getDegree(); i >= other.getDegree(); i--)
-        {   
+        {
             quotient.coefficients[i - other.getDegree()] = remainder.coefficients[i] / other.coefficients.back();
             const Fr& factor = quotient.coefficients[i - other.getDegree()];
             if (!factor.isZero()) {
@@ -222,25 +222,23 @@ ostream& operator<< (ostream& os, const Polynomial& p) {
     }
     else {
         for (int i = p.getDegree(); i >= 0; --i) {
-            if (i == 0) {
-                os << p.coefficients[i];
-            }
-            else {
-                os << p.coefficients[i] << " X^" << i << " + ";
-            }
+            if (p.coefficients[i].isZero()) continue;
+            if (i < p.getDegree()) os << " + ";
+            os << p.coefficients[i];
+            if (i > 0) os << " * X";
+            if (i > 1) os << "^" << i;
         }
         return os;
     }
 }
 
-VanishingPolynomial::VanishingPolynomial(uint len) : Polynomial() {
+VanishingPolynomial::VanishingPolynomial(uint len)  {
     if (len == 0) {
         throw std::invalid_argument("Vanishing polynomial degree must be positive");
     }
-    std::vector<Fr> coefficients(len + 1, Fr(0));
+    coefficients.resize(len + 1, Fr(0));
     coefficients[0] = Fr(-1);
     coefficients[len] = Fr(1);
-    this->coefficients = coefficients;
 }
 
 VanishingPolynomial::VanishingPolynomial(const VanishingPolynomial& other) : Polynomial(other) {}

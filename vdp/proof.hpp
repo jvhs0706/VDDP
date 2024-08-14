@@ -61,4 +61,21 @@ bool Binary(const Polynomial& F, const Polynomial& R,
     const G1& com_F, const PubParam& pp, 
     Timer& ptimer, Timer& vtimer);
 
+bool Hadamard(const Polynomial& Fc, const Polynomial& Rc, 
+    const Polynomial& Fa, const Polynomial& Ra,
+    const Polynomial& Fb, const Polynomial& Rb,
+    const uint len, const Fr& omega,
+    const G1& com_Fc, const G1& com_Fa, const G1& com_Fb,
+    const PubParam& pp,
+    Timer& ptimer, Timer& vtimer);
+
+bool Mux(const Polynomial& Fs, const Polynomial& Rs, // selector
+    const Polynomial& Fa, const Polynomial& Ra,
+    const Polynomial& Fb, const Polynomial& Rb,
+    const Polynomial& Fout, const Polynomial& Rout,
+    const uint len, const Fr& omega,
+    const G1& com_Fs, const G1& com_Fa, const G1& com_Fb, const G1& com_Fout,
+    const PubParam& pp,
+    Timer& ptimer, Timer& vtimer);
+
 #endif // PROOF_HPP

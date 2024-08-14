@@ -320,3 +320,81 @@ bool Binary(const Polynomial& F, const Polynomial& R,
 
     return accepted;
 }
+
+// c = a * b
+bool Hadamard(const Polynomial& Fc, const Polynomial& Rc, 
+    const Polynomial& Fa, const Polynomial& Ra,
+    const Polynomial& Fb, const Polynomial& Rb,
+    const uint len, const Fr& omega,
+    const G1& com_Fc, const G1& com_Fa, const G1& com_Fb,
+    const PubParam& pp,
+    Timer& ptimer, Timer& vtimer)    
+{
+    bool accepted = true;
+    ptimer.start();
+    Polynomial zero_poly = Fa * Fb - Fc;
+    VanishingPolynomial V(len);
+    Polynomial F_quot, F_rem;
+    zero_poly.divide(V, F_quot, F_rem);
+    assert (F_rem.getDegree() == -1); // It's the zero polynomial
+    auto R_quot = randomPolynomial(len);
+    auto com_F_quot = commitPoly(F_quot, R_quot, pp.gVec, pp.hVec);
+    ptimer.stop();
+
+    vtimer.start();
+    Fr u;
+    u.setByCSPRNG();
+    const auto v = V(u);
+    vtimer.stop();
+
+    ptimer.start();
+    const auto ya = Fa(u), yb = Fb(u), yc = Fc(u), y_quot = F_quot(u); // z = x * y
+    Fr ra, rb, rc, r_quot;
+    ra.setByCSPRNG();
+    rb.setByCSPRNG();
+    rc.setByCSPRNG();
+    r_quot.setByCSPRNG();
+
+    const G1& g = pp.gVec[0];
+    const G1& h = pp.hVec[0];
+    const auto com_a = g * ya + h * ra;
+    const auto com_b = g * yb + h * rb;
+    const auto com_c = g * yc + h * rc;
+    const auto com_quot = g * y_quot + h * r_quot;
+    ptimer.stop();
+
+    accepted &= EvalSecret(ya, ra, u, Fa, Ra, com_a, com_Fa, pp, ptimer, vtimer);
+    accepted &= EvalSecret(yb, rb, u, Fb, Rb, com_b, com_Fb, pp, ptimer, vtimer);
+    accepted &= EvalSecret(yc, rc, u, Fc, Rc, com_c, com_Fc, pp, ptimer, vtimer);
+    accepted &= EvalSecret(y_quot, r_quot, u, F_quot, R_quot, com_quot, com_F_quot, pp, ptimer, vtimer);
+    accepted &= Prod(v * y_quot + yc, v * r_quot + rc, yb, rb, ya, ra, com_quot * v + com_c, com_b, com_a, g, h, ptimer, vtimer);
+
+    return accepted;
+}
+
+//out - b = s * (a - b)
+bool Mux(const Polynomial& Fs, const Polynomial& Rs, // selector
+    const Polynomial& Fa, const Polynomial& Ra,
+    const Polynomial& Fb, const Polynomial& Rb,
+    const Polynomial& Fout, const Polynomial& Rout,
+    const uint len, const Fr& omega,
+    const G1& com_Fs, const G1& com_Fa, const G1& com_Fb, const G1& com_Fout,
+    const PubParam& pp,
+    Timer& ptimer, Timer& vtimer)
+{
+    ptimer.start();
+    const auto F_lhs = Fout - Fb;
+    const auto R_lhs = Rout - Rb;
+    const auto& F_rhs_1 = Fs;
+    const auto& R_rhs_1 = Rs;
+    const auto F_rhs_2 = Fa - Fb;
+    const auto R_rhs_2 = Ra - Rb;
+    vtimer.start();
+    const auto com_F_lhs = com_Fout - com_Fb;
+    const auto& com_F_rhs_1 = com_Fs;
+    const auto com_F_rhs_2 = com_Fa - com_Fb;
+    vtimer.stop();
+    ptimer.stop();
+
+    return Hadamard(F_lhs, R_lhs, F_rhs_1, R_rhs_1, F_rhs_2, R_rhs_2, len, omega, com_F_lhs, com_F_rhs_1, com_F_rhs_2, pp, ptimer, vtimer);
+}

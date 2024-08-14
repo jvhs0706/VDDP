@@ -122,3 +122,52 @@ vector<int> sampleLaplacian(const vector<vector<bool>>& r1, const vector<vector<
 
     return res;    
 }
+
+// NOT TESTED YET
+vector<bool> BernoulliStepSample(vector<bool> prev, bool b,
+    const Fr& key,
+    const LegendrePRNGPubParam& pp, 
+    const BernoulliStepCache& cache_prev, BernoulliStepCache& cache_cur)
+{
+    vector<bool> res(pp.len);
+    vector<uint> idx(pp.len);
+    assert (prev.size() == pp.len);
+    vector<Fr> rt_vec(pp.len);
+    auto r = LegendrePRNG(key, pp.len, rt_vec);
+
+    auto* idx_begin = &idx.front();
+    for_each(
+        std::execution::par,
+        idx.begin(),
+        idx.end(),
+        [&](uint& j)
+        {
+            j = &j - idx_begin;
+            auto t = b != r[j];
+            res[j] = t ? !r[j] : res[j];
+        }
+    );
+
+    auto& g = pp.pp.gVec[0];
+    auto& h = pp.pp.hVec[0];
+
+    cache_cur.key = key;
+    cache_cur.r_key.setByCSPRNG();
+    cache_cur.F_prev = cache_prev.F_cur;
+    cache_cur.R_prev = cache_prev.R_cur;
+    convertLegendrePRNG(rt_vec, r, cache_cur.F_prng_rt, cache_cur.F_prng_res, pp);
+    cache_cur.R_prng_rt = randomPolynomial(cache_cur.F_prng_rt.getDegree());
+    cache_cur.R_prng_res = randomPolynomial(cache_cur.F_prng_res.getDegree());
+    
+    cache_cur.F_cur = ntt_vec_to_poly_given_omega(vector<Fr>(res.begin(), res.end()), pp.omega_gen);
+    cache_cur.R_cur = randomPolynomial(cache_cur.F_cur.getDegree());
+
+    commitLegendrePRNG(cache_cur.key, cache_cur.F_prng_rt, cache_cur.F_prng_res,
+        cache_cur.r_key, cache_cur.R_prng_rt, cache_cur.R_prng_res,
+        cache_cur.com_key, cache_cur.com_prng_rt, cache_cur.com_prng_res, pp);
+
+    cache_cur.com_prev = cache_prev.com_cur;
+    cache_cur.com_cur = commitPoly(cache_cur.F_cur, cache_cur.R_cur, pp.pp.gVec, pp.pp.hVec);
+
+    return res;
+}
