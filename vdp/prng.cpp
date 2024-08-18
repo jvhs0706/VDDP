@@ -46,7 +46,7 @@ vector<bool> LegendrePRNG(const Fr& key, uint len, vector<Fr>& rt_vec)
     // generate a random bit string of length len using the LegendrePRF function
     vector<bool> res(len);
     for_each(
-        std::execution::par,
+        // std::execution::par,
         rt_vec.begin(),
         rt_vec.end(),
         [&](Fr& rt)
@@ -181,3 +181,4 @@ bool proveLegendrePRNG(const Fr& key, const Polynomial& F_rt, const Polynomial& 
     return accepted;
     
 }
+

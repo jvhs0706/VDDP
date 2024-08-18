@@ -38,7 +38,10 @@ PubParam trustedSetup(uint maxDeg)
 
 G1 commitPoly(const Polynomial& F, const std::vector<G1>& gVec)
 {
-    assert(F.getDegree() >= 0);
+    if (F.getDegree() == -1)
+    {
+        return gVec[0] * 0;
+    }
     assert(F.getDegree() < gVec.size());
 
     G1 result = gVec[0] * F[0];
@@ -52,7 +55,14 @@ G1 commitPoly(const Polynomial& F, const std::vector<G1>& gVec)
 
 G1 commitPoly(const Polynomial& F, const Polynomial& R, const std::vector<G1>& gVec, const std::vector<G1>& hVec)
 {
-    assert(F.getDegree() >= 0);
+    if (R.getDegree() == -1)
+    {
+        return commitPoly(F, gVec);
+    }
+    if (F.getDegree() == -1)
+    {
+        return hVec[0] * R[0];
+    }
     assert(F.getDegree() < gVec.size());
     assert(R.getDegree() >= 0);
     assert(R.getDegree() < hVec.size());

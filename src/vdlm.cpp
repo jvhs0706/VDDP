@@ -137,14 +137,14 @@ vector<bool> BernoulliStepSample(vector<bool> prev, bool b,
 
     auto* idx_begin = &idx.front();
     for_each(
-        std::execution::par,
+        // std::execution::par,
         idx.begin(),
         idx.end(),
         [&](uint& j)
         {
             j = &j - idx_begin;
             auto t = b != r[j];
-            res[j] = t ? !r[j] : res[j];
+            res[j] = t ? !r[j] : prev[j];
         }
     );
 
@@ -168,6 +168,49 @@ vector<bool> BernoulliStepSample(vector<bool> prev, bool b,
 
     cache_cur.com_prev = cache_prev.com_cur;
     cache_cur.com_cur = commitPoly(cache_cur.F_cur, cache_cur.R_cur, pp.pp.gVec, pp.pp.hVec);
+    cache_cur.b = b;
 
     return res;
+}
+
+bool BernoulliStepIP(const BernoulliStepCache& cache, const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer)
+{
+    bool accepted = proveLegendrePRNG(cache.key, cache.F_prng_rt, cache.F_prng_res, 
+        cache.r_key, cache.R_prng_rt, cache.R_prng_res,
+        cache.com_key, cache.com_prng_rt, cache.com_prng_res, 
+        pp, ptimer, vtimer);
+
+    auto Fr_ = - cache.F_prng_res + Fr(1);
+    auto Rr_ = - cache.R_prng_res;
+    auto comr_ = - cache.com_prng_res + pp.pp.gVec[0];
+
+    auto Ft = cache.b ? Fr_ : cache.F_prng_res;
+    auto Rt = cache.b ? Rr_ : cache.R_prng_res;
+    auto comt = cache.b ? comr_ : cache.com_prng_res;
+
+    accepted &= Mux(Ft, Rt, Fr_, Rr_, cache.F_prev, cache.R_prev, cache.F_cur, cache.R_cur, 
+        pp.len, pp.omega_gen, comt, comr_, cache.com_prev, cache.com_cur, pp.pp, ptimer, vtimer);
+
+    return accepted;
+}
+
+vector<bool> Bernoulli(vector<bool> p, const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer, G1& com_out)
+{
+    vector<bool> x_vec(pp.len, true);
+    BernoulliStepCache cache_prev, cache_cur;
+
+    cache_prev.F_cur = Polynomial(vector<Fr>{1});
+    cache_prev.R_cur = Polynomial(vector<Fr>{});
+    cache_prev.com_cur = pp.pp.gVec[0];
+
+    for (int i = p.size() - 1; i >= 0; -- i)
+    {
+        Fr key;
+        key.setByCSPRNG();
+        x_vec = BernoulliStepSample(x_vec, p[i], key, pp, cache_prev, cache_cur);
+        assert(BernoulliStepIP(cache_cur, pp, ptimer, vtimer));
+        cache_prev = cache_cur;
+    }
+    com_out = cache_cur.com_cur;
+    return x_vec;
 }

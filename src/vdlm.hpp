@@ -38,7 +38,9 @@ vector<bool> BernoulliStepSample(vector<bool> prev, bool b,
     const LegendrePRNGPubParam& pp, 
     const BernoulliStepCache& cache_prev, BernoulliStepCache& cache_cur);
 
-bool BernoulliStepIP(const BernoulliStepCache& cache, const LegendrePRNGPubParam& pp);
+bool BernoulliStepIP(const BernoulliStepCache& cache, const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer);
+
+vector<bool> Bernoulli(vector<bool> p, const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer, G1& com_out);
 
 
 
