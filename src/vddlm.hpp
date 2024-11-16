@@ -14,4 +14,6 @@ vector<bool> Bernoulli(vector<bool> p, const LegendrePRNGPubParam& pp, Timer& co
 
 vector<uint> Geometric(double p, uint log_range, uint prec, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out);
 
+vector<int> DiscreteLaplacian(double t, uint log_range, uint prec, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out);
+
 #endif // VDDLM_HPP

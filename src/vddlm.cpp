@@ -118,6 +118,8 @@ vector<uint> Geometric(double p, uint log_range, uint prec, const LegendrePRNGPu
         );
         comp_timer.stop();
 
+        ptimer.start();
+        vtimer.start();
         if (i == 0)
         {
             F_out = step_F_out;
@@ -130,7 +132,34 @@ vector<uint> Geometric(double p, uint log_range, uint prec, const LegendrePRNGPu
             R_out += step_R_out * Fr(1 << i);
             com_out += step_com_out * Fr(1 << i);
         }
+        vtimer.stop();
+        ptimer.stop();
     }
 
     return res;
+}
+
+vector<int> DiscreteLaplacian(double t, uint log_range, uint prec, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out)
+{
+    Polynomial F1, R1, F2, R2;
+    G1 com1, com2;
+    double p = 1 - exp(-1.0L / t);
+    auto res1 = Geometric(p, log_range, prec, pp, comp_timer, ptimer, vtimer, F1, R1, com1);
+    auto res2 = Geometric(p, log_range, prec, pp, comp_timer, ptimer, vtimer, F2, R2, com2);
+    
+    ptimer.start();
+    vtimer.start();
+    F_out = F1 - F2;
+    R_out = R1 - R2;
+    com_out = com1 - com2;
+    vtimer.stop();
+    ptimer.stop();
+
+    // return res1 - res2, make them signed
+    vector<int> out = vector<int>(pp.len, 0);
+    for (uint i = 0; i < pp.len; ++ i)
+    {
+        out[i] = (signed) res1[i] - (signed) res2[i];
+    }
+    return out;
 }

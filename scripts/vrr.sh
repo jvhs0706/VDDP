@@ -14,6 +14,9 @@
 
 source activate ~/.conda/envs/VDP_ENV
 
+if [ ! -d "build" ]; then
+    mkdir build
+fi
 cd build
 cmake ..
 make

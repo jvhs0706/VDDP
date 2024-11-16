@@ -15,38 +15,58 @@ int main(int argc, char** argv) {
     // initialize the random seed
     srand(time(NULL));
 
-    uint len = stoi(argv[1]);
-    auto pp = LegendrePRNGTrustedSetup(len);
-
-    float p = stod(argv[2]);
-    uint prec = stoi(argv[3]);
-    uint log_range = stoi(argv[4]);
+    string i_file = argv[1];
+    string o_file = argv[2];
+    uint dim = stoi(argv[3]);
+    double eps = stod(argv[4]);
+    uint log_range = stoi(argv[5]);
+    uint prec = stoi(argv[6]);
 
     Timer setup_timer, computing_timer;
     Timer ptimer, vtimer;
 
-    Polynomial F_out, R_out;
-    G1 com_out;
+    setup_timer.start();
+    auto pp = LegendrePRNGTrustedSetup(dim);
+    setup_timer.stop();
 
-    Polynomial F, R;
-    G1 com;
+    // load the input, binary file
+    uint size = findsize(i_file);
+    assert(size == dim * sizeof(int));
+    vector<int> counts(dim);
+    loadbin(i_file, counts.data(), size);
 
-    auto p_bin = probToBits(p, prec);
-    // print out p_bin
-    for (auto b : p_bin) cout << b;
-    cout << endl;
+    computing_timer.start();
+    Polynomial F_in = ntt_vec_to_poly_given_omega(vector<Fr>(counts.begin(), counts.end()), pp.omega_gen);
+    Polynomial R_in = randomPolynomial(F_in.getDegree());
+    G1 com_in = commitPoly(F_in, R_in, pp.pp.gVec, pp.pp.hVec);
+    computing_timer.stop();
 
-    auto g = Geometric(p, log_range, prec, pp, computing_timer, ptimer, vtimer, F, R, com_out);
-    uint sum = 0;
-    for (const auto & i : g) {
-        sum += i;
+    Polynomial F_noise, R_noise;
+    G1 com_noise;
+    vector<int> noise = DiscreteLaplacian(1.0L/eps, log_range, prec, pp, computing_timer, ptimer, vtimer, F_noise, R_noise, com_noise);
+
+    ptimer.start();
+    vtimer.start();
+    Polynomial F_out = F_in + F_noise;
+    Polynomial R_out = R_in + R_noise;
+    G1 com_out = com_in + com_noise;
+    vtimer.stop();
+    vector<int> res(dim);
+    for (uint i = 0; i < dim; ++i) {
+        res[i] = counts[i] + noise[i];
     }
-    // print the mean of g
-    cout << "mean = " << (double)sum / len << endl;
-    cout << computing_timer.getTotalTime() << " " << ptimer.getTotalTime() << " " << vtimer.getTotalTime() << endl;
-    return 0;
+    ptimer.stop();
 
-    
+    // save the output, binary file
+    savebin(o_file, res.data(), dim * sizeof(int));
+
+    // check output matches
+    assert(F_out == ntt_vec_to_poly_given_omega(vector<Fr>(res.begin(), res.end()), pp.omega_gen));
+
+    cout << "Setting time: " << setup_timer.getTotalTime() << " s\n";
+    cout << "Computing time: " << computing_timer.getTotalTime() << " s\n";
+    cout << "Proving time: " << ptimer.getTotalTime() << " s\n";
+    cout << "Verifying time: " << vtimer.getTotalTime() << " s\n";
 
     return 0;
 }

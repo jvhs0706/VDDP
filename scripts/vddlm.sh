@@ -9,4 +9,4 @@ cmake ..
 make
 cd ..
 
-./build/src/vddlm 1024 0.5 6 10
+python scripts/vddlm.py --dim 1024 --eps 1 --count_range 100 --noise_log_range 6 --prec 4

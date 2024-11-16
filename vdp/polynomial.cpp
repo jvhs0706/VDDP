@@ -7,7 +7,7 @@
 
 using namespace std;
 
-Polynomial::Polynomial() : coefficients() {}
+Polynomial::Polynomial() : coefficients(0) {}
 
 Polynomial::Polynomial(const Fr& constant) : coefficients({constant}) {
     removeLeadingZeros();
@@ -32,7 +32,7 @@ Polynomial& Polynomial::operator=(const Polynomial& other) {
 
 Polynomial Polynomial::operator+(const Polynomial& other) const {
     std::vector<Fr> resultCoefficients(std::max(coefficients.size(), other.coefficients.size()));
-    for (size_t i = 0; i < resultCoefficients.size(); ++i) {
+    for (uint i = 0; i < resultCoefficients.size(); ++i) {
         Fr a = (i < coefficients.size()) ? coefficients[i] : Fr(0);
         Fr b = (i < other.coefficients.size()) ? other.coefficients[i] : Fr(0);
         resultCoefficients[i] = a + b;
@@ -44,7 +44,7 @@ Polynomial Polynomial::operator+(const Polynomial& other) const {
 
 Polynomial Polynomial::operator-(const Polynomial& other) const {
     std::vector<Fr> resultCoefficients(std::max(coefficients.size(), other.coefficients.size()));
-    for (auto i = 0; i < resultCoefficients.size(); ++i) {
+    for (uint i = 0; i < resultCoefficients.size(); ++i) {
         Fr a = (i < coefficients.size()) ? coefficients[i] : Fr(0);
         Fr b = (i < other.coefficients.size()) ? other.coefficients[i] : Fr(0);
         resultCoefficients[i] = a - b;

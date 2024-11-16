@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include <fstream>
 using namespace std;
 using namespace mcl::bn;
 
@@ -74,4 +75,26 @@ Polynomial ntt_vec_to_poly_given_omega(const vector<Fr>& a, const Fr& omega)
     Polynomial out(transformed);
     out /= Fr(a.size());
     return out;
+}
+
+// Below are for file I/O
+
+void savebin(const string& filename, const void* data, uint size)
+{
+    ofstream out(filename, ios::binary);
+    out.write((char*)data, size);
+    out.close();
+}
+
+uint findsize(const string& filename)
+{
+    ifstream in(filename, ios::binary | ios::ate);
+    return in.tellg();
+}
+
+void loadbin(const string& filename, void* data, uint size)
+{
+    ifstream in(filename, ios::binary);
+    in.read((char*)data, size);
+    in.close();
 }
