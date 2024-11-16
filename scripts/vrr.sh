@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --time=11:59:59
+#SBATCH --time=23:59:59
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=32
 #SBATCH --mem=236511M
-#SBATCH --job-name=shilishanlu
+#SBATCH --job-name=ShoiguGerasimovGdeSukaBojepripasy
 #SBATCH --output=logs/vrr-%N-%j.out
 #SBATCH --error=logs/vrr-%N-%j.err
 #SBATCH --exclude=snorlax-[1,3]
