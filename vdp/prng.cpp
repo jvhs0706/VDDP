@@ -42,7 +42,7 @@ vector<Fr> arange(uint len)
     vector<Fr> res(len);
     Fr* res_begin = &res.front();
     for_each(
-        // std::execution::par,
+        std::execution::par,
         res.begin(),
         res.end(),
         [&](Fr& rt)
