@@ -107,7 +107,7 @@ vector<uint> Geometric(double p, uint log_range, uint prec, const LegendrePRNGPu
 
         comp_timer.start();
         for_each(
-            // std::execution::par,
+            std::execution::par,
             res.begin(),
             res.end(),
             [&](uint& j)

@@ -61,7 +61,7 @@ G1 commitPoly(const Polynomial& F, const Polynomial& R, const std::vector<G1>& g
     }
     if (F.getDegree() == -1)
     {
-        return hVec[0] * R[0];
+        return commitPoly(R, hVec);
     }
     assert(F.getDegree() < gVec.size());
     assert(R.getDegree() >= 0);
