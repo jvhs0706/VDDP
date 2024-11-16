@@ -1,6 +1,23 @@
 #include "prng.hpp"
 #include <execution>
 
+void determineSeed(Fr& key, Fr& r_key, G1& com_key, const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer)
+{
+    Fr pub_coin;
+    
+    ptimer.start();
+    key.setByCSPRNG();
+    r_key.setByCSPRNG();
+    com_key = pp.pp.gVec[0] * key + pp.pp.hVec[0] * r_key;
+    
+    vtimer.start();
+    pub_coin.setByCSPRNG();
+    key += pub_coin;
+    com_key += pp.pp.gVec[0] * pub_coin;
+    vtimer.stop();
+    ptimer.stop();
+}
+
 LegendrePRNGPubParam LegendrePRNGTrustedSetup(uint len)
 {
     // len > 0
@@ -25,7 +42,7 @@ vector<Fr> arange(uint len)
     vector<Fr> res(len);
     Fr* res_begin = &res.front();
     for_each(
-        std::execution::par,
+        // std::execution::par,
         res.begin(),
         res.end(),
         [&](Fr& rt)
@@ -68,12 +85,11 @@ void convertLegendrePRNG(const vector<Fr>& rt_vec, const vector<bool>& res, Poly
     F_res = ntt_vec_to_poly_given_omega(vector<Fr>(res.begin(), res.end()), pp.omega_gen);
 }
 
-void commitLegendrePRNG(const Fr& key, const Polynomial& F_rt, const Polynomial& F_res, 
-    const Fr& r_key, const Polynomial& R_rt, const Polynomial& R_res, 
-    G1& com_key, G1& com_rt, G1& com_res, 
+void commitLegendrePRNG(const Polynomial& F_rt, const Polynomial& F_res, 
+    const Polynomial& R_rt, const Polynomial& R_res, 
+    G1& com_rt, G1& com_res, 
     const LegendrePRNGPubParam& pp)
 {
-    com_key = pp.pp.gVec[0] * key + pp.pp.hVec[0] * r_key;
     com_rt = commitPoly(F_rt, R_rt, pp.pp.gVec, pp.pp.hVec);
     com_res = commitPoly(F_res, R_res, pp.pp.gVec, pp.pp.hVec);
 }
@@ -182,3 +198,28 @@ bool proveLegendrePRNG(const Fr& key, const Polynomial& F_rt, const Polynomial& 
     
 }
 
+vector<bool> verifiableUniformBits(Polynomial& F, Polynomial& R, G1& com, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer)
+{
+    Fr key, r_key;
+    G1 com_key;
+    determineSeed(key, r_key, com_key, pp, ptimer, vtimer);
+
+    comp_timer.start();
+    vector<Fr> rt_vec;
+    auto res = LegendrePRNG(key, pp.len, rt_vec);
+    Polynomial F_rt;
+    auto R_rt = randomPolynomial(F_rt.getDegree());
+    G1 com_rt;
+
+    convertLegendrePRNG(rt_vec, res, F_rt, F, pp);
+    R = randomPolynomial(F.getDegree());
+    commitLegendrePRNG(F_rt, F, R_rt, R, com_rt, com, pp);
+    comp_timer.stop();
+
+    assert(proveLegendrePRNG(key, F_rt, F, r_key, R_rt, R, com_key, com_rt, com, pp, ptimer, vtimer));
+
+    
+
+    return res; 
+
+}
