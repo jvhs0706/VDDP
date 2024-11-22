@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     # y axis legend: time in seconds
     plt.ylabel('Time (s)')
-    plt.savefig('logs/vrr-running-times.png', bbox_inches='tight')
+    plt.savefig('logs/vrr-running-times.pdf', bbox_inches='tight')
 
     # make a 2 * 4 grid of plots
     fig, axs = plt.subplots(2, 4, figsize=(12, 6), sharex=True, sharey=True, tight_layout=True)
@@ -61,4 +61,4 @@ if __name__ == '__main__':
     fig.legend(handles, labels, bbox_to_anchor=(0.5, -0.1), loc='lower center', ncol=8, title='Desired $\epsilon$', fontsize='medium')
 
     plt.show()
-    plt.savefig('logs/vrr-precision.png', bbox_inches='tight')
+    plt.savefig('logs/vrr-precision.pdf', bbox_inches='tight')
