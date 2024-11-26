@@ -26,3 +26,5 @@ for eps in 0.0009765625 0.001953125 0.00390625 0.0078125 0.015625 0.03125 0.0625
 do
     python scripts/vddlm-anal.py --eps $eps --delta $DELTA_MIN --count_search_space $COUNT_SEARCH_SPACE --prec_search_space $PREC_SEARCH_SPACE
 done
+
+python scripts/vddlm-anal-plot.py

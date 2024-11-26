@@ -6,7 +6,7 @@ import pandas as pd
 
 if __name__ == '__main__':
     df = pd.read_csv('logs/vrr.csv')
-    sns.set(style="whitegrid")
+    sns.set_theme(style="darkgrid")
 
     # plot (setup, committing, computing, proving, verifying) |vs inv_prec with error bar
     plt.figure()

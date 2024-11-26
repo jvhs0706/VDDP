@@ -3,6 +3,7 @@ import numpy as np
 
 import argparse
 import os
+from itertools import product
 
 def round_prob(p: float, num_bit: int):
     bits = 0
@@ -22,8 +23,9 @@ def round_prob(p: float, num_bit: int):
 
 def bc23_get_cost(eps: float, delta: float):
     # compute the number of bits
-    n = 100 * math.log(2/delta) / (eps ** 2)
-    return eps, delta, n, 0.5 * n
+    nb = math.ceil(100 * math.log(2/delta) / (eps ** 2))
+    l1 = math.sqrt(nb/2) / math.sqrt(math.pi)
+    return eps, delta, nb, l1
 
 def safe_geom_to_ber(p_geom: float, i: int):
     try:
@@ -77,6 +79,7 @@ argparser.add_argument('--eps', type=float, required=True)
 argparser.add_argument('--delta', type=float, required=True)
 argparser.add_argument('--count_search_space', type=int, required=True)
 argparser.add_argument('--prec_search_space', type=int, required=True)
+argparser.add_argument('--eps_tolerance', type=float, default=1.1)
 
 if __name__ == "__main__":
     args = argparser.parse_args()
@@ -92,12 +95,13 @@ if __name__ == "__main__":
     with open('logs/vddlm-anal.csv', 'a') as f:
         f.write(f'bc23,{args.eps},{args.delta},{bc23_num_bit},{bc23_l1}\n')
 
-    for log_range in range(1, args.count_search_space):
-        for prec in range(1, args.prec_search_space):
-            try: 
-                eps, delta, num_bit, l1_expectation = vdlm_get_priv_cost(1/args.eps, log_range, prec)
-                if delta < args.delta:
-                    with open('logs/vddlm-anal.csv', 'a') as f:
-                        f.write(f'ours,{eps},{delta},{num_bit},{l1_expectation}\n')
-            except:
-                pass
+    
+    for log_range, prec in product(range(1, args.count_search_space), range(1, args.prec_search_space)):
+        try:
+            eps, delta, num_bit, l1_expectation = vdlm_get_priv_cost(1/args.eps, log_range, prec)
+            if eps < args.eps * args.eps_tolerance and delta < args.delta:
+                with open('logs/vddlm-anal.csv', 'a') as f:
+                    f.write(f'ours,{eps},{delta},{num_bit},{l1_expectation}\n')
+                break
+        except:
+            pass
