@@ -22,8 +22,6 @@ cmake ..
 make
 cd ..
 
-build/src/vrr 4 1024 1012 4
-
 NUM_REPEAT=100
 
 # if logs/vrr.csv exists, remove it
@@ -31,18 +29,18 @@ if [ -f "logs/vrr.csv" ]; then
     rm logs/vrr.csv
 fi
 
-# for i in $(seq 1 $NUM_REPEAT)
-# do 
-#     for eps in 0.125 0.25 0.5 1.0 2.0 4.0 8.0
-#     do
-#         for log_prec in 6 7 8 9 10 11 12
-#         do
-#             for num_class in 2 4 8 16 32 64 128
-#             do
-#                 python scripts/vrr.py --eps $eps --log_prec $log_prec --num_class $num_class
-#             done
-#         done
-#     done
-#     python scripts/vrrplot.py # plot the results up to the current repeat
-# done 
+for i in $(seq 1 $NUM_REPEAT)
+do 
+    for eps in 0.125 0.25 0.5 1.0 2.0 4.0 8.0
+    do
+        for log_prec in 6 7 8 9 10 11 12
+        do
+            for num_class in 2 4 8 16 32 64 128
+            do
+                python scripts/vrr.py --eps $eps --log_prec $log_prec --num_class $num_class
+            done
+        done
+    done
+    python scripts/vrrplot.py # plot the results up to the current repeat
+done 
 

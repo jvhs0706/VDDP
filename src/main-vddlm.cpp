@@ -22,6 +22,7 @@ int main(int argc, char** argv) {
 
     Timer setup_timer, computing_timer;
     Timer ptimer, vtimer;
+    uint comm = 0;
 
     setup_timer.start();
     auto pp = LegendrePRNGTrustedSetup(dim);
@@ -45,7 +46,7 @@ int main(int argc, char** argv) {
 
     Polynomial F_noise, R_noise;
     G1 com_noise;
-    vector<int> noise = DiscreteLaplacianNew(z_config, g_config, pp, computing_timer, ptimer, vtimer, F_noise, R_noise, com_noise);
+    vector<int> noise = DiscreteLaplacianNew(z_config, g_config, pp, computing_timer, ptimer, vtimer, comm, F_noise, R_noise, com_noise);
 
     ptimer.start();
     Polynomial F_out = F_in + F_noise;
@@ -59,6 +60,8 @@ int main(int argc, char** argv) {
     }
     ptimer.stop();
 
+    comm += (sizeof(Fr) * dim * 2);
+
     // save the output, binary file
     savebin(o_file, res.data(), dim * sizeof(int));
 
@@ -71,6 +74,7 @@ int main(int argc, char** argv) {
     cout << "Computing time: " << computing_timer.getTotalTime() << " s\n";
     cout << "Proving time: " << ptimer.getTotalTime() << " s\n";
     cout << "Verifying time: " << vtimer.getTotalTime() << " s\n";
+    cout << "Communication: " << comm << " B\n";
 
     return 0;
 }

@@ -68,48 +68,6 @@ void readVDDLMConfig(const string& config_file, vector<bool>& z_config, vector<v
 
 }
 
-void readVDDLMConfig(const string& config_file, vector<bool>& z_config, vector<vector<bool>>& g_config)
-{
-    // empty z_config and g_config
-    z_config.clear();
-    g_config.clear();
-
-    ifstream in(config_file, ios::in);
-    if (!in.is_open()) throw invalid_argument("Cannot open config file");
-
-    string line;
-    uint linecount = 0;
-    while (getline(in, line))
-    {
-        if (linecount == 0){ // z 0101111011
-            assert (line[0] == 'z');
-            // locate the first ' '
-            auto space_pos = line.find(' ');
-            if (space_pos == string::npos) throw invalid_argument("Invalid config file");
-            for (uint i = space_pos + 1; i < line.size(); ++ i)
-            {
-                if (line[i] == '0') z_config.push_back(false);
-                else if (line[i] == '1') z_config.push_back(true);
-                else throw invalid_argument("Invalid config file");
-            }
-        }
-        else { // num 0101111011
-            auto space_pos = line.find(' ');
-            if (space_pos == string::npos) throw invalid_argument("Invalid config file");
-            vector<bool> g;
-            for (uint i = space_pos + 1; i < line.size(); ++ i)
-            {
-                if (line[i] == '0') g.push_back(false);
-                else if (line[i] == '1') g.push_back(true);
-                else throw invalid_argument("Invalid config file");
-            }
-            g_config.push_back(g);
-        }
-        linecount ++;
-    }
-
-}
-
 vector<bool> Bernoulli(vector<bool> p, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, uint& comm, Polynomial& F_out, Polynomial& R_out, G1& com_out)
 {
     // the last bit of p must be 1
@@ -127,7 +85,7 @@ vector<bool> Bernoulli(vector<bool> p, const LegendrePRNGPubParam& pp, Timer& co
         Polynomial F_out_, R_out_;
         G1 com_out_;
         auto p_ = vector<bool>(p.begin() + 1, p.end());
-        auto res_ = Bernoulli(p_, pp, comp_timer, ptimer, vtimer, F_out_, R_out_, com_out_, comm);
+        auto res_ = Bernoulli(p_, pp, comp_timer, ptimer, vtimer, comm, F_out_, R_out_, com_out_);
 
         Polynomial F_cur, R_cur;
         G1 com_cur;
@@ -248,10 +206,12 @@ vector<int> DiscreteLaplacian(double t, uint log_range, uint prec, const Legendr
     {
         out[i] = (signed) res1[i] - (signed) res2[i];
     }
+
+    comm += sizeof(G1);
     return out;
 }
 
-vector<uint> GeometricNew(const vector<vector<bool>>& config, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out)
+vector<uint> GeometricNew(const vector<vector<bool>>& config, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, uint& comm, Polynomial& F_out, Polynomial& R_out, G1& com_out)
 {
     vector<uint> res(pp.len, 0);
     auto res_begin = &res.front();
@@ -263,7 +223,7 @@ vector<uint> GeometricNew(const vector<vector<bool>>& config, const LegendrePRNG
         assert (q_bin.back());
         Polynomial step_F_out, step_R_out;
         G1 step_com_out;
-        auto r = Bernoulli(q_bin, pp, comp_timer, ptimer, vtimer, step_F_out, step_R_out, step_com_out);
+        auto r = Bernoulli(q_bin, pp, comp_timer, ptimer, vtimer, comm, step_F_out, step_R_out, step_com_out);
 
         comp_timer.start();
         for_each(
@@ -299,11 +259,11 @@ vector<uint> GeometricNew(const vector<vector<bool>>& config, const LegendrePRNG
     return res;
 }
 
-vector<int> DiscreteLaplacianNew(const vector<bool>& z_config, const vector<vector<bool>>& g_config, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out)
+vector<int> DiscreteLaplacianNew(const vector<bool>& z_config, const vector<vector<bool>>& g_config, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, uint& comm, Polynomial& F_out, Polynomial& R_out, G1& com_out)
 {
     Polynomial F_geom_, R_geom_;
     G1 com_geom_;
-    auto geom = GeometricNew(g_config, pp, comp_timer, ptimer, vtimer, F_geom_, R_geom_, com_geom_);
+    auto geom = GeometricNew(g_config, pp, comp_timer, ptimer, vtimer, comm, F_geom_, R_geom_, com_geom_);
     auto F_geom = F_geom_ + Fr(1);
     auto& R_geom = R_geom_;
     auto com_geom = com_geom_ + pp.pp.gVec[0];
@@ -312,8 +272,8 @@ vector<int> DiscreteLaplacianNew(const vector<bool>& z_config, const vector<vect
     Polynomial F_zero, R_zero, F_is_positive, R_is_positive;
     G1 com_zero, com_is_positive;
 
-    auto is_zero = Bernoulli(z_config, pp, comp_timer, ptimer, vtimer, F_zero, R_zero, com_zero); 
-    auto is_positive = verifiableUniformBits(F_is_positive, R_is_positive, com_is_positive, pp, comp_timer, ptimer, vtimer);
+    auto is_zero = Bernoulli(z_config, pp, comp_timer, ptimer, vtimer, comm, F_zero, R_zero, com_zero); 
+    auto is_positive = verifiableUniformBits(F_is_positive, R_is_positive, com_is_positive, pp, comp_timer, ptimer, vtimer, comm);
 
     vector<int> sign(pp.len, 0);
     for (uint i = 0; i < pp.len; ++ i)
@@ -331,12 +291,14 @@ vector<int> DiscreteLaplacianNew(const vector<bool>& z_config, const vector<vect
     auto R_c = R_is_positive * Fr(2) + R_zero - R_sign;
     auto com_c = com_is_positive * Fr(2) + com_zero - com_sign - pp.pp.gVec[0];
 
+    comm += sizeof(G1);
+
     assert (Hadamard(F_c, R_c, 
         F_is_positive * Fr(2), R_is_positive * Fr(2),
         F_zero, R_zero,
         pp.len, pp.omega_gen,
         com_c, com_is_positive * Fr(2), com_zero,
-        pp.pp, ptimer, vtimer)); 
+        pp.pp, ptimer, vtimer, comm)); 
 
     vector<int> out(pp.len, 0);
     for (uint i = 0; i < pp.len; ++ i)
@@ -352,7 +314,7 @@ vector<int> DiscreteLaplacianNew(const vector<bool>& z_config, const vector<vect
         F_sign, R_sign,
         pp.len, pp.omega_gen,
         com_out, com_geom, com_sign,
-        pp.pp, ptimer, vtimer));
+        pp.pp, ptimer, vtimer, comm));
 
     return out;
 

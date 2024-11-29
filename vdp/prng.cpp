@@ -102,7 +102,7 @@ bool proveLegendrePRNG(const Fr& key, const Polynomial& F_rt, const Polynomial& 
     const G1& com_key, const G1& com_rt, const G1& com_res, 
     const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer, uint& communication)
 {
-    bool accepted = Binary(F_res, R_res, pp.len, pp.omega_gen, com_res, pp.pp, ptimer, vtimer);
+    bool accepted = Binary(F_res, R_res, pp.len, pp.omega_gen, com_res, pp.pp, ptimer, vtimer, communication);
 
 
     const auto& F_range = pp.F_range;

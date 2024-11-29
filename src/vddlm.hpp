@@ -20,8 +20,8 @@ vector<uint> Geometric(double p, uint log_range, uint prec, const LegendrePRNGPu
 
 vector<int> DiscreteLaplacian(double t, uint log_range, uint prec, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out);
 
-vector<uint> GeometricNew(const vector<vector<bool>>& config, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out);
+vector<uint> GeometricNew(const vector<vector<bool>>& config, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, uint& comm, Polynomial& F_out, Polynomial& R_out, G1& com_out);
 
-vector<int> DiscreteLaplacianNew(const vector<bool>& z_config, const vector<vector<bool>>& g_config, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out);
+vector<int> DiscreteLaplacianNew(const vector<bool>& z_config, const vector<vector<bool>>& g_config, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, uint& comm, Polynomial& F_out, Polynomial& R_out, G1& com_out);
 
 #endif // VDDLM_HPP
