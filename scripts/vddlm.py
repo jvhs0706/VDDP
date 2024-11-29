@@ -27,7 +27,7 @@ def round_prob(p: float, num_bit: int):
 
 def bc23_get_cost(eps: float, delta: float):
     # compute the number of bits
-    nb = math.ceil(100 * math.log(2/delta) / (eps ** 2))
+    nb = math.ceil(10 * math.log(2/delta) / (eps ** 2))
     l1 = math.sqrt(nb/2) / math.sqrt(math.pi)
     return eps, delta, nb, l1
 
