@@ -64,7 +64,7 @@ Fr VRRCompute(const uint ix, const uint is, const uint ir, const VRRPubParam& vr
 
 bool VRR(const uint ix, const uint is, const Fr& rx, const Fr& rs, 
     const G1& comx, const G1& coms, const Fr& y, const uint ir, 
-    const VRRPubParam& vrrpp, Timer &ptimer, Timer &vtimer)
+    const VRRPubParam& vrrpp, Timer &ptimer, Timer &vtimer, uint& communication)
 {
     bool accepted = true;
     vtimer.start();
@@ -99,7 +99,7 @@ bool VRR(const uint ix, const uint is, const Fr& rx, const Fr& rs,
     auto com_F_new = vrrpp.com_F + vrrpp.com_F_omega * alpha;
 
 
-    accepted &= SecretEval(z, rz, t, rt, F_new, comz, comt, com_F_new, vrrpp.pp, ptimer, vtimer);
+    accepted &= SecretEval(z, rz, t, rt, F_new, comz, comt, com_F_new, vrrpp.pp, ptimer, vtimer, communication);
     auto& g = vrrpp.pp.gVec[0];
     auto& h = vrrpp.pp.hVec[0];
     ptimer.start();
@@ -108,7 +108,9 @@ bool VRR(const uint ix, const uint is, const Fr& rx, const Fr& rs,
     ptimer.stop();
 
     accepted &= Prod(y, 0, z, rz, x, rx, 
-        g * y, comz, comx, g, h, ptimer, vtimer);
+        g * y, comz, comx, g, h, ptimer, vtimer, communication);
+
+    communication += (sizeof(Fr) + sizeof(G1));
 
     return accepted;
 

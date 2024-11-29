@@ -50,13 +50,16 @@ int main(int argc, char** argv) {
 
     Timer ptimer, vtimer;
 
-    assert(VRR(ix, is, rx, rs, comx, coms, y, ir, vrrpp, ptimer, vtimer));
+    uint comm;
+
+    assert(VRR(ix, is, rx, rs, comx, coms, y, ir, vrrpp, ptimer, vtimer, comm));
 
     cout << "Setting time: " << setup_timer.getTotalTime() << " s\n";
     cout << "Committing time: " << committing_timer.getTotalTime() << " s\n";
     cout << "Computing time: " << computing_timer.getTotalTime() << " s\n";
     cout << "Proving time: " << ptimer.getTotalTime() << " s\n";
     cout << "Verifying time: " << vtimer.getTotalTime() << " s\n";
+    cout << "Communication: " << comm << " bytes\n";
 
 
     return 0;
