@@ -22,7 +22,10 @@ cmake ..
 make
 cd ..
 
-NUM_REPEAT=5
+NUM_REPEAT=1
+DELTA_MIN=1e-10
+LOG_NOISE_RANGE_SEARCH_SPACE=50
+PREC_SEARCH_SPACE=50
 COUNT_RANGE=114514
 
 # if logs/vddlm.csv exists, remove it
@@ -30,19 +33,13 @@ if [ -f "logs/vddlm.csv" ]; then
     rm logs/vddlm.csv
 fi
 
-for i in $(seq 1 $NUM_REPEAT)
-do 
-    for dim in 4 16 64 256 1024 4096 16384 65536
+for dim in 16 64 256 1024 4096
+do
+    for eps in 9.5e-4 9.5e-3 9.5e-2 9.5e-1
     do
-        for eps in 0.125 0.25 0.5 1.0 2.0 4.0 8.0
+        for i in $(seq 1 $NUM_REPEAT)
         do
-            for noise_log_range in 4 6 8 10 12 14 16
-            do
-                for prec in 4 6 8 10 12 14 16
-                do
-                    python scripts/vddlm.py --dim $dim --eps $eps --count_range $COUNT_RANGE --noise_log_range $noise_log_range --prec $prec
-                done
-            done
+            python scripts/vddlm.py --dim $dim --eps $eps --count_range $COUNT_RANGE --delta $DELTA_MIN --log_noise_range_search_space $LOG_NOISE_RANGE_SEARCH_SPACE --prec_search_space $PREC_SEARCH_SPACE 
         done
     done
 done 

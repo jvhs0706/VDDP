@@ -19,12 +19,12 @@ if [ -f "logs/vddlm-anal.csv" ]; then
 fi
 
 DELTA_MIN=1e-10
-COUNT_SEARCH_SPACE=50
+LOG_NOISE_RANGE_SEARCH_SPACE=50
 PREC_SEARCH_SPACE=50
 
 for eps in 0.0009765625 0.001953125 0.00390625 0.0078125 0.015625 0.03125 0.0625 0.125 0.25 0.5 1.0 2.0 4.0
 do
-    python scripts/vddlm-anal.py --eps $eps --delta $DELTA_MIN --count_search_space $COUNT_SEARCH_SPACE --prec_search_space $PREC_SEARCH_SPACE
+    python scripts/vddlm.py --eps $eps --delta $DELTA_MIN --log_noise_range_search_space $LOG_NOISE_RANGE_SEARCH_SPACE --prec_search_space $PREC_SEARCH_SPACE --anal
 done
 
 python scripts/vddlm-anal-plot.py
