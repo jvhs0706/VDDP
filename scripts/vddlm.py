@@ -29,7 +29,8 @@ def bc23_get_cost(eps: float, delta: float):
     # compute the number of bits
     nb = math.ceil(10 * math.log(2/delta) / (eps ** 2))
     l1 = math.sqrt(nb/2) / math.sqrt(math.pi)
-    return eps, delta, nb, l1
+    l2 = math.sqrt(nb) / 2
+    return eps, delta, nb, l1, l2
 
 def safe_geom_to_ber(p_geom: float, i: int):
     try:
@@ -69,14 +70,20 @@ def vdlm_get_priv_cost(t: float, log_range: int, prec: int):
         eps = max(eps, eps_temp)
     delta = (1 - pz) * math.exp(cumsum_log_p[-1]) / 2 
 
-    l1_expectation = 0
-    for i in range(log_range):
-        l1_expectation += (1 << i) * p_list[i]
-    l1_expectation = qz * (l1_expectation + 1)
+    g_bitwise_exp = np.array([(1 << i) * p_list[i] for i in range(log_range)])
+    g_sq_bitwise_exp = g_bitwise_exp[:, None] * g_bitwise_exp[None, :]
+
+    # exp of geom
+    g_exp = g_bitwise_exp.sum()
+    g_sq_exp = g_sq_bitwise_exp.sum()
+
+    # compute the expectation of L1
+    l1 = qz * (g_exp + 1)
+    l2 = math.sqrt(qz * (g_sq_exp + 2 * g_exp + 1))
 
     num_bit = 1 + sum([len(_) for _ in prob_bits.values()])
 
-    return eps, delta, num_bit, l1_expectation, prob_bits
+    return eps, delta, num_bit, l1, l2, prob_bits
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dim', type=int) # not required in anal mode
@@ -87,30 +94,31 @@ parser.add_argument('--log_noise_range_search_space', type=int, required=True)
 parser.add_argument('--prec_search_space', type=int, required=True)
 parser.add_argument('--eps_tolerance', type=float, default=1.05)
 parser.add_argument('--anal', action = 'store_true')
+parser.add_argument('--nser', type=int, default = 2)
 
 if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.anal:
-        _, _, bc23_num_bit, bc23_l1 = bc23_get_cost(args.eps, args.delta)
+        _, _, bc23_num_bit, bc23_l1, bc23_l2 = bc23_get_cost(args.eps, args.delta)
         if not os.path.isdir('logs'):
             os.mkdir('logs')
             
         if not os.path.isfile('logs/vddlm-anal.csv'):
             with open('logs/vddlm-anal.csv', 'w') as f:
-                f.write('algorithm,eps,delta,num_coin,l1\n')
+                f.write('algorithm,eps,delta,num_coin,l1,l2\n')
 
         with open('logs/vddlm-anal.csv', 'a') as f:
-            f.write(f'bc23,{args.eps},{args.delta},{bc23_num_bit},{bc23_l1}\n')
+            f.write(f'bc23,{args.eps},{args.delta},{bc23_num_bit},{bc23_l1},{bc23_l2}\n')
 
-    eps, delta, num_bit, l1_expectation, prob_bits = None, None, None, None, None
+    eps, delta, num_bit, l1, l2, prob_bits = None, None, None, None, None, None
     for log_noise_range, prec in product(range(1, args.log_noise_range_search_space), range(1, args.prec_search_space)):
         try:
-            eps, delta, num_bit, l1_expectation, prob_bits = vdlm_get_priv_cost(1/args.eps, log_noise_range, prec)
+            eps, delta, num_bit, l1, l2, prob_bits = vdlm_get_priv_cost(1/args.eps, log_noise_range, prec)
             if eps < args.eps * args.eps_tolerance and delta < args.delta:
                 if args.anal:
                     with open('logs/vddlm-anal.csv', 'a') as f:
-                        f.write(f'ours,{eps},{delta},{num_bit},{l1_expectation}\n')
+                        f.write(f'ours,{eps},{delta},{num_bit},{l1},{l2}\n')
                 break
         except Exception as e:
             if isinstance(e, IndexError) or isinstance(e, ValueError):
@@ -134,24 +142,24 @@ if __name__ == '__main__':
             count_noisy_data_path = os.path.join(tempdir, 'count_noisy_data.bin')
             count_data.tofile(count_data_path)
 
-            output = subprocess.check_output(f'./build/src/vddlm {args.dim} {count_data_path} {count_noisy_data_path} {tempdir}/prob_bits.txt', shell=True)
+            output = subprocess.check_output(f'./build/src/vddlm {args.nser} {args.dim} {count_data_path} {count_noisy_data_path} {tempdir}/prob_bits.txt', shell=True)
             output_str = output.decode('utf-8')
 
             # get the noisy count data
             noise_count_data = load_int(count_noisy_data_path)
 
             # get average L1 and L2 error between the original and noisy count data
-            l1_diff = np.abs(count_data - noise_count_data).sum() / args.dim
-            l2_diff = np.sqrt(np.square(count_data - noise_count_data).sum()) / args.dim
+            l1_diff = np.abs(count_data - noise_count_data).sum() 
+            l2_diff = np.sqrt(np.square(count_data - noise_count_data).sum()) 
 
             if not os.path.isdir('logs'):
                 os.mkdir('logs')
             
             if not os.path.isfile('logs/vddlm.csv'):
                 with open('logs/vddlm.csv', 'w') as f:
-                    f.write('dim,eps,delta,num_bit,setup,computing,proving,verifying,l1,l2\n')
+                    f.write('nser,dim,eps,delta,num_bit,setup,computing,proving,verifying,l1,l2\n')
             
-            log_str = f'{args.dim},{eps},{delta},{num_bit},'
+            log_str = f'{args.nser},{args.dim},{eps},{delta},{num_bit},'
             rts = [line.split(' ')[-2] for line in output_str.split('\n') if line]
             assert(len(rts) == 4)
             log_str += ','.join(rts)
