@@ -123,7 +123,7 @@ bool verifyPolyEval(const Fr& y, const G1& proof, const G1& commitment, const Fr
 
 bool SecretEval(const Fr& y, const Fr& ry, const Fr& x, const Fr& rx, const Polynomial& F, 
     const G1& com_y, const G1& com_x, const G1& com_F, 
-    const PubParam& pp, Timer& ptimer, Timer& vtimer)
+    const PubParam& pp, Timer& ptimer, Timer& vtimer, uint& communication)
 {
     bool accepted = true;
 
@@ -157,7 +157,7 @@ bool SecretEval(const Fr& y, const Fr& ry, const Fr& x, const Fr& rx, const Poly
     auto com_z_ = g * z_ + h * r_z_;
     ptimer.stop();
 
-    accepted &= Prod(y - z, ry, x - u, rx, z_, r_z_, com_y - g * z, com_x - g * u, com_z_, g, h, ptimer, vtimer);
+    accepted &= Prod(y - z, ry, x - u, rx, z_, r_z_, com_y - g * z, com_x - g * u, com_z_, g, h, ptimer, vtimer, communication);
 
     ptimer.start();
     auto proof = provePolyEval(F, u, z, gVec);
@@ -178,13 +178,15 @@ bool SecretEval(const Fr& y, const Fr& ry, const Fr& x, const Fr& rx, const Poly
     accepted &= verifyPolyEval(yF_, yR_, proof_, com_F_ - com_z_, u, g, h, g2, g2_tau);
     vtimer.stop();
 
+    communication += (4 * sizeof(G1) + sizeof(Fr));
+
     return accepted;
 }
 
 bool EvalSecret(const Fr& y, const Fr& ry, const Fr& x, // secret y, public x
     const Polynomial& F, const Polynomial& R, // secret F, R
     const G1& com_y, const G1& com_F, 
-    const PubParam& pp, Timer& ptimer, Timer& vtimer)
+    const PubParam& pp, Timer& ptimer, Timer& vtimer, uint& communication)
 {
     bool accepted = true;
 
@@ -216,12 +218,14 @@ bool EvalSecret(const Fr& y, const Fr& ry, const Fr& x, // secret y, public x
     accepted &= verifyPolyEval(y_, r_, proof, com_F_, x, g, h, g2, g2_tau);
     vtimer.stop();
 
+    communication += sizeof(G1);
+
     return accepted;
 }
 
 bool Prod(const Fr& z, const Fr& r_z, const Fr& x, const Fr& r_x, const Fr& y, const Fr& r_y,
     const G1& com_z, const G1& com_x, const G1& com_y, const G1& g, const G1& h,
-    Timer& ptimer, Timer& vtimer)
+    Timer& ptimer, Timer& vtimer, uint& communication)
     
 {
     bool accepted = true;
@@ -256,12 +260,14 @@ bool Prod(const Fr& z, const Fr& r_z, const Fr& x, const Fr& r_x, const Fr& y, c
     accepted &= (delta + com_z * c == com_x * z3 + h * z5);
     vtimer.stop();
 
+    communication += (6 * sizeof(Fr) + 3 * sizeof(G1));
+
     return accepted;
 }
 
 bool Equal(const Fr& x, const Fr& r_x, const Fr& y, const Fr& r_y, 
     const G1& com_x, const G1& com_y, const G1& g, const G1& h,
-    Timer& ptimer, Timer& vtimer)
+    Timer& ptimer, Timer& vtimer, uint& communication)
 {
     bool accepted = true;
 
@@ -284,13 +290,15 @@ bool Equal(const Fr& x, const Fr& r_x, const Fr& y, const Fr& r_y,
     accepted &= (h * z == (com_x - com_y) * c + a);
     vtimer.stop();
 
+    communication += (2 * sizeof(Fr) + 1 * sizeof(G1));
+
     return accepted;
 }
 
 bool Binary(const Polynomial& F, const Polynomial& R, 
     const uint len, const Fr& omega, 
     const G1& com_F, const PubParam& pp, 
-    Timer& ptimer, Timer& vtimer)
+    Timer& ptimer, Timer& vtimer, uint& communication)
 {
     bool accepted = true;
     ptimer.start();
@@ -324,9 +332,11 @@ bool Binary(const Polynomial& F, const Polynomial& R,
     
     ptimer.stop();
 
-    accepted &= EvalSecret(x, r_x, u, F, R, com_x, com_F, pp, ptimer, vtimer);
-    accepted &= EvalSecret(z_, r_z_, u, F_quot, R_quot, com_z_, com_F_quot, pp, ptimer, vtimer);
-    accepted &= Prod(z, r_z, x, r_x, x, r_x, com_z, com_x, com_x, g, h, ptimer, vtimer);
+    accepted &= EvalSecret(x, r_x, u, F, R, com_x, com_F, pp, ptimer, vtimer, communication);
+    accepted &= EvalSecret(z_, r_z_, u, F_quot, R_quot, com_z_, com_F_quot, pp, ptimer, vtimer, communication);
+    accepted &= Prod(z, r_z, x, r_x, x, r_x, com_z, com_x, com_x, g, h, ptimer, vtimer, communication);
+
+    communication += (3 * sizeof(G1) + 2 * sizeof(Fr));
 
     return accepted;
 }
@@ -338,7 +348,7 @@ bool Hadamard(const Polynomial& Fc, const Polynomial& Rc,
     const uint len, const Fr& omega,
     const G1& com_Fc, const G1& com_Fa, const G1& com_Fb,
     const PubParam& pp,
-    Timer& ptimer, Timer& vtimer)    
+    Timer& ptimer, Timer& vtimer, uint& communication)    
 {
     bool accepted = true;
     ptimer.start();
@@ -373,12 +383,13 @@ bool Hadamard(const Polynomial& Fc, const Polynomial& Rc,
     const auto com_quot = g * y_quot + h * r_quot;
     ptimer.stop();
 
-    accepted &= EvalSecret(ya, ra, u, Fa, Ra, com_a, com_Fa, pp, ptimer, vtimer);
-    accepted &= EvalSecret(yb, rb, u, Fb, Rb, com_b, com_Fb, pp, ptimer, vtimer);
-    accepted &= EvalSecret(yc, rc, u, Fc, Rc, com_c, com_Fc, pp, ptimer, vtimer);
-    accepted &= EvalSecret(y_quot, r_quot, u, F_quot, R_quot, com_quot, com_F_quot, pp, ptimer, vtimer);
-    accepted &= Prod(v * y_quot + yc, v * r_quot + rc, yb, rb, ya, ra, com_quot * v + com_c, com_b, com_a, g, h, ptimer, vtimer);
+    accepted &= EvalSecret(ya, ra, u, Fa, Ra, com_a, com_Fa, pp, ptimer, vtimer, communication);
+    accepted &= EvalSecret(yb, rb, u, Fb, Rb, com_b, com_Fb, pp, ptimer, vtimer, communication);
+    accepted &= EvalSecret(yc, rc, u, Fc, Rc, com_c, com_Fc, pp, ptimer, vtimer, communication);
+    accepted &= EvalSecret(y_quot, r_quot, u, F_quot, R_quot, com_quot, com_F_quot, pp, ptimer, vtimer, communication);
+    accepted &= Prod(v * y_quot + yc, v * r_quot + rc, yb, rb, ya, ra, com_quot * v + com_c, com_b, com_a, g, h, ptimer, vtimer, communication);
 
+    communication += (3 * sizeof(G1) + 1 * sizeof(Fr));
     return accepted;
 }
 
@@ -390,7 +401,7 @@ bool Mux(const Polynomial& Fs, const Polynomial& Rs, // selector
     const uint len, const Fr& omega,
     const G1& com_Fs, const G1& com_Fa, const G1& com_Fb, const G1& com_Fout,
     const PubParam& pp,
-    Timer& ptimer, Timer& vtimer)
+    Timer& ptimer, Timer& vtimer, uint& communication)
 {
     ptimer.start();
     const auto F_lhs = Fout - Fb;
@@ -406,5 +417,5 @@ bool Mux(const Polynomial& Fs, const Polynomial& Rs, // selector
     vtimer.stop();
     ptimer.stop();
 
-    return Hadamard(F_lhs, R_lhs, F_rhs_1, R_rhs_1, F_rhs_2, R_rhs_2, len, omega, com_F_lhs, com_F_rhs_1, com_F_rhs_2, pp, ptimer, vtimer);
+    return Hadamard(F_lhs, R_lhs, F_rhs_1, R_rhs_1, F_rhs_2, R_rhs_2, len, omega, com_F_lhs, com_F_rhs_1, com_F_rhs_2, pp, ptimer, vtimer, communication);
 }

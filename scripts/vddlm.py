@@ -157,11 +157,11 @@ if __name__ == '__main__':
             
             if not os.path.isfile('logs/vddlm.csv'):
                 with open('logs/vddlm.csv', 'w') as f:
-                    f.write('nser,dim,eps,delta,num_bit,setup,computing,proving,verifying,l1,l2\n')
+                    f.write('nser,dim,eps,delta,num_bit,setup,computing,proving,verifying,comm,l1,l2\n')
             
             log_str = f'{args.nser},{args.dim},{eps},{delta},{num_bit},'
             rts = [line.split(' ')[-2] for line in output_str.split('\n') if line]
-            assert(len(rts) == 4)
+            assert(len(rts) == 5)
             log_str += ','.join(rts)
             log_str += f',{l1_diff},{l2_diff}'
             with open('logs/vddlm.csv', 'a') as f:

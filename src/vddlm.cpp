@@ -68,7 +68,7 @@ void readVDDLMConfig(const string& config_file, vector<bool>& z_config, vector<v
 
 }
 
-vector<bool> Bernoulli(vector<bool> p, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out)
+vector<bool> Bernoulli(vector<bool> p, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, uint& comm, Polynomial& F_out, Polynomial& R_out, G1& com_out)
 {
     // the last bit of p must be 1
     if (p.size() == 0 || !p.back()) {
@@ -79,17 +79,17 @@ vector<bool> Bernoulli(vector<bool> p, const LegendrePRNGPubParam& pp, Timer& co
         Fr key, r_key;
         G1 com_key;
         vector<Fr> rt_vec(pp.len);
-        return verifiableUniformBits(F_out, R_out, com_out, pp, comp_timer, ptimer, vtimer);
+        return verifiableUniformBits(F_out, R_out, com_out, pp, comp_timer, ptimer, vtimer, comm);
     }
     else {
         Polynomial F_out_, R_out_;
         G1 com_out_;
         auto p_ = vector<bool>(p.begin() + 1, p.end());
-        auto res_ = Bernoulli(p_, pp, comp_timer, ptimer, vtimer, F_out_, R_out_, com_out_);
+        auto res_ = Bernoulli(p_, pp, comp_timer, ptimer, vtimer, comm, F_out_, R_out_, com_out_);
 
         Polynomial F_cur, R_cur;
         G1 com_cur;
-        auto cur_bit = verifiableUniformBits(F_cur, R_cur, com_cur, pp, comp_timer, ptimer, vtimer);
+        auto cur_bit = verifiableUniformBits(F_cur, R_cur, com_cur, pp, comp_timer, ptimer, vtimer, comm);
         auto res = vector<bool>(pp.len);
 
         if (p[0])
@@ -102,6 +102,7 @@ vector<bool> Bernoulli(vector<bool> p, const LegendrePRNGPubParam& pp, Timer& co
             F_out = ntt_vec_to_poly_given_omega(vector<Fr>(res.begin(), res.end()), pp.omega_gen);
             R_out = randomPolynomial(F_out.getDegree());
             com_out = commitPoly(F_out, R_out, pp.pp.gVec, pp.pp.hVec);
+            comm += sizeof(G1);
             auto Fc = F_out_ + F_cur - F_out;
             auto Rc = R_out_ + R_cur - R_out;
             assert (Hadamard(Fc, Rc, 
@@ -109,7 +110,7 @@ vector<bool> Bernoulli(vector<bool> p, const LegendrePRNGPubParam& pp, Timer& co
                 F_cur, R_cur,
                 pp.len, pp.omega_gen,
                 com_out_ + com_cur - com_out, com_out_, com_cur,
-                pp.pp, ptimer, vtimer));
+                pp.pp, ptimer, vtimer, comm));
         }
         else
         {
@@ -121,12 +122,13 @@ vector<bool> Bernoulli(vector<bool> p, const LegendrePRNGPubParam& pp, Timer& co
             F_out = ntt_vec_to_poly_given_omega(vector<Fr>(res.begin(), res.end()), pp.omega_gen);
             R_out = randomPolynomial(F_out.getDegree());
             com_out = commitPoly(F_out, R_out, pp.pp.gVec, pp.pp.hVec);
+            comm += sizeof(G1);
             assert (Hadamard(F_out, R_out, 
                 F_out_, R_out_,
                 F_cur, R_cur,
                 pp.len, pp.omega_gen,
                 com_out, com_out_, com_cur,
-                pp.pp, ptimer, vtimer));
+                pp.pp, ptimer, vtimer, comm));
         }
 
         return res;
@@ -134,7 +136,7 @@ vector<bool> Bernoulli(vector<bool> p, const LegendrePRNGPubParam& pp, Timer& co
 
 }
 
-vector<uint> Geometric(double p, uint log_range, uint prec, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out)
+vector<uint> Geometric(double p, uint log_range, uint prec, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, uint& comm, Polynomial& F_out, Polynomial& R_out, G1& com_out)
 {
     vector<uint> res(pp.len, 0);
     auto res_begin = &res.front();
@@ -146,7 +148,7 @@ vector<uint> Geometric(double p, uint log_range, uint prec, const LegendrePRNGPu
         if (!q_bin.size()) break;
         Polynomial step_F_out, step_R_out;
         G1 step_com_out;
-        auto r = Bernoulli(q_bin, pp, comp_timer, ptimer, vtimer, step_F_out, step_R_out, step_com_out);
+        auto r = Bernoulli(q_bin, pp, comp_timer, ptimer, vtimer, comm, step_F_out, step_R_out, step_com_out);
 
         comp_timer.start();
         for_each(
@@ -182,13 +184,13 @@ vector<uint> Geometric(double p, uint log_range, uint prec, const LegendrePRNGPu
     return res;
 }
 
-vector<int> DiscreteLaplacian(double t, uint log_range, uint prec, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out)
+vector<int> DiscreteLaplacian(double t, uint log_range, uint prec, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, uint& comm, Polynomial& F_out, Polynomial& R_out, G1& com_out)
 {
     Polynomial F1, R1, F2, R2;
     G1 com1, com2;
     double p = 1 - exp(-1.0L / t);
-    auto res1 = Geometric(p, log_range, prec, pp, comp_timer, ptimer, vtimer, F1, R1, com1);
-    auto res2 = Geometric(p, log_range, prec, pp, comp_timer, ptimer, vtimer, F2, R2, com2);
+    auto res1 = Geometric(p, log_range, prec, pp, comp_timer, ptimer, vtimer, comm, F1, R1, com1);
+    auto res2 = Geometric(p, log_range, prec, pp, comp_timer, ptimer, vtimer, comm, F2, R2, com2);
     
     ptimer.start();
     vtimer.start();
@@ -204,10 +206,12 @@ vector<int> DiscreteLaplacian(double t, uint log_range, uint prec, const Legendr
     {
         out[i] = (signed) res1[i] - (signed) res2[i];
     }
+
+    comm += sizeof(G1);
     return out;
 }
 
-vector<uint> GeometricNew(const vector<vector<bool>>& config, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out)
+vector<uint> GeometricNew(const vector<vector<bool>>& config, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, uint& comm, Polynomial& F_out, Polynomial& R_out, G1& com_out)
 {
     vector<uint> res(pp.len, 0);
     auto res_begin = &res.front();
@@ -219,7 +223,7 @@ vector<uint> GeometricNew(const vector<vector<bool>>& config, const LegendrePRNG
         assert (q_bin.back());
         Polynomial step_F_out, step_R_out;
         G1 step_com_out;
-        auto r = Bernoulli(q_bin, pp, comp_timer, ptimer, vtimer, step_F_out, step_R_out, step_com_out);
+        auto r = Bernoulli(q_bin, pp, comp_timer, ptimer, vtimer, comm, step_F_out, step_R_out, step_com_out);
 
         comp_timer.start();
         for_each(
@@ -255,11 +259,11 @@ vector<uint> GeometricNew(const vector<vector<bool>>& config, const LegendrePRNG
     return res;
 }
 
-vector<int> DiscreteLaplacianNew(const vector<bool>& z_config, const vector<vector<bool>>& g_config, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, Polynomial& F_out, Polynomial& R_out, G1& com_out)
+vector<int> DiscreteLaplacianNew(const vector<bool>& z_config, const vector<vector<bool>>& g_config, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, uint& comm, Polynomial& F_out, Polynomial& R_out, G1& com_out)
 {
     Polynomial F_geom_, R_geom_;
     G1 com_geom_;
-    auto geom = GeometricNew(g_config, pp, comp_timer, ptimer, vtimer, F_geom_, R_geom_, com_geom_);
+    auto geom = GeometricNew(g_config, pp, comp_timer, ptimer, vtimer, comm, F_geom_, R_geom_, com_geom_);
     auto F_geom = F_geom_ + Fr(1);
     auto& R_geom = R_geom_;
     auto com_geom = com_geom_ + pp.pp.gVec[0];
@@ -268,8 +272,8 @@ vector<int> DiscreteLaplacianNew(const vector<bool>& z_config, const vector<vect
     Polynomial F_zero, R_zero, F_is_positive, R_is_positive;
     G1 com_zero, com_is_positive;
 
-    auto is_zero = Bernoulli(z_config, pp, comp_timer, ptimer, vtimer, F_zero, R_zero, com_zero); 
-    auto is_positive = verifiableUniformBits(F_is_positive, R_is_positive, com_is_positive, pp, comp_timer, ptimer, vtimer);
+    auto is_zero = Bernoulli(z_config, pp, comp_timer, ptimer, vtimer, comm, F_zero, R_zero, com_zero); 
+    auto is_positive = verifiableUniformBits(F_is_positive, R_is_positive, com_is_positive, pp, comp_timer, ptimer, vtimer, comm);
 
     vector<int> sign(pp.len, 0);
     for (uint i = 0; i < pp.len; ++ i)
@@ -287,12 +291,14 @@ vector<int> DiscreteLaplacianNew(const vector<bool>& z_config, const vector<vect
     auto R_c = R_is_positive * Fr(2) + R_zero - R_sign;
     auto com_c = com_is_positive * Fr(2) + com_zero - com_sign - pp.pp.gVec[0];
 
+    comm += sizeof(G1);
+
     assert (Hadamard(F_c, R_c, 
         F_is_positive * Fr(2), R_is_positive * Fr(2),
         F_zero, R_zero,
         pp.len, pp.omega_gen,
         com_c, com_is_positive * Fr(2), com_zero,
-        pp.pp, ptimer, vtimer)); 
+        pp.pp, ptimer, vtimer, comm)); 
 
     vector<int> out(pp.len, 0);
     for (uint i = 0; i < pp.len; ++ i)
@@ -308,7 +314,7 @@ vector<int> DiscreteLaplacianNew(const vector<bool>& z_config, const vector<vect
         F_sign, R_sign,
         pp.len, pp.omega_gen,
         com_out, com_geom, com_sign,
-        pp.pp, ptimer, vtimer));
+        pp.pp, ptimer, vtimer, comm));
 
     return out;
 

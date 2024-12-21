@@ -31,7 +31,7 @@ Fr VRRCompute(const uint ix, const uint is, const uint ir, const VRRPubParam& vr
 
 bool VRR(const uint ix, const uint is, const Fr& rx, const Fr& rs, 
     const G1& comx, const G1& coms, const Fr& y, const uint ir, 
-    const VRRPubParam& vrrpp, Timer &ptimer, Timer &vtimer);
+    const VRRPubParam& vrrpp, Timer &ptimer, Timer &vtimer, uint& communication);
 
 
 #endif // VRR_HPP

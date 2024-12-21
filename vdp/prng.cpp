@@ -1,7 +1,7 @@
 #include "prng.hpp"
 #include <execution>
 
-void determineSeed(Fr& key, Fr& r_key, G1& com_key, const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer)
+void determineSeed(Fr& key, Fr& r_key, G1& com_key, const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer, uint& communication)
 {
     Fr pub_coin;
     
@@ -16,6 +16,8 @@ void determineSeed(Fr& key, Fr& r_key, G1& com_key, const LegendrePRNGPubParam& 
     com_key += pp.pp.gVec[0] * pub_coin;
     vtimer.stop();
     ptimer.stop();
+
+    communication += (sizeof(Fr) + sizeof(G1));
 }
 
 LegendrePRNGPubParam LegendrePRNGTrustedSetup(uint len)
@@ -98,9 +100,9 @@ void commitLegendrePRNG(const Polynomial& F_rt, const Polynomial& F_res,
 bool proveLegendrePRNG(const Fr& key, const Polynomial& F_rt, const Polynomial& F_res,
     const Fr& r_key, const Polynomial& R_rt, const Polynomial& R_res,
     const G1& com_key, const G1& com_rt, const G1& com_res, 
-    const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer)
+    const LegendrePRNGPubParam& pp, Timer& ptimer, Timer& vtimer, uint& communication)
 {
-    bool accepted = Binary(F_res, R_res, pp.len, pp.omega_gen, com_res, pp.pp, ptimer, vtimer);
+    bool accepted = Binary(F_res, R_res, pp.len, pp.omega_gen, com_res, pp.pp, ptimer, vtimer, communication);
 
 
     const auto& F_range = pp.F_range;
@@ -120,6 +122,7 @@ bool proveLegendrePRNG(const Fr& key, const Polynomial& F_rt, const Polynomial& 
     auto com_F_quot = commitPoly(F_quot, R_quot, pp.pp.gVec, pp.pp.hVec);
     ptimer.stop();
 
+    communication += sizeof(G1);
 
     vtimer.start();
     Fr u;
@@ -127,12 +130,14 @@ bool proveLegendrePRNG(const Fr& key, const Polynomial& F_rt, const Polynomial& 
     const Fr z_omega = F_omega(u);
     vtimer.stop();
 
+    communication += sizeof(Fr);
 
     ptimer.start();
     Fr z_range;
     auto z_range_proof = provePolyEval(F_range, u, z_range, pp.pp.gVec);
     ptimer.stop();
 
+    communication += (sizeof(Fr) + sizeof(G1));
 
     vtimer.start();
     accepted &= verifyPolyEval(z_range, z_range_proof, pp.com_F_range, u, g, pp.pp.g2, pp.pp.g2_tau);
@@ -165,7 +170,9 @@ bool proveLegendrePRNG(const Fr& key, const Polynomial& F_rt, const Polynomial& 
     const auto com_lhs = g * z_lhs + h * r_lhs;
     ptimer.stop();
 
-    accepted &= Prod(z_lhs, r_lhs, z_res_, r_res_, key_, r_key_, com_lhs, com_res_u_, com_key_, g, h, ptimer, vtimer);
+    communication += sizeof(G1);
+
+    accepted &= Prod(z_lhs, r_lhs, z_res_, r_res_, key_, r_key_, com_lhs, com_res_u_, com_key_, g, h, ptimer, vtimer, communication);
 
     ptimer.start();
     auto z_rhs = z_rt * z_rt;
@@ -174,7 +181,9 @@ bool proveLegendrePRNG(const Fr& key, const Polynomial& F_rt, const Polynomial& 
     const auto com_rhs = g * z_rhs + h * r_rhs;
     ptimer.stop();
 
-    accepted &= Prod(z_rhs, r_rhs, z_rt, r_rt, z_rt, r_rt, com_rhs, com_rt_u, com_rt_u, g, h, ptimer, vtimer);
+    communication += sizeof(G1);
+
+    accepted &= Prod(z_rhs, r_rhs, z_rt, r_rt, z_rt, r_rt, com_rhs, com_rt_u, com_rt_u, g, h, ptimer, vtimer, communication);
 
     ptimer.start();
     const Fr z_quot = F_quot(u);
@@ -183,7 +192,9 @@ bool proveLegendrePRNG(const Fr& key, const Polynomial& F_rt, const Polynomial& 
     const auto com_quot = g * z_quot + h * r_quot;
     ptimer.stop();
 
-    accepted &= EvalSecret(z_quot, r_quot, u, F_quot, R_quot, com_quot, com_F_quot, pp.pp, ptimer, vtimer);
+    communication += sizeof(G1);
+
+    accepted &= EvalSecret(z_quot, r_quot, u, F_quot, R_quot, com_quot, com_F_quot, pp.pp, ptimer, vtimer, communication);
     
     ptimer.start();
     auto z_quot_ = z_quot * z_omega;
@@ -192,17 +203,17 @@ bool proveLegendrePRNG(const Fr& key, const Polynomial& F_rt, const Polynomial& 
 
     accepted &= Equal(z_quot_, r_quot_, z_lhs - z_rhs, r_lhs - r_rhs, 
         com_quot * z_omega,
-        com_lhs - com_rhs, g, h, ptimer, vtimer);
+        com_lhs - com_rhs, g, h, ptimer, vtimer, communication);
     
     return accepted;
     
 }
 
-vector<bool> verifiableUniformBits(Polynomial& F, Polynomial& R, G1& com, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer)
+vector<bool> verifiableUniformBits(Polynomial& F, Polynomial& R, G1& com, const LegendrePRNGPubParam& pp, Timer& comp_timer, Timer& ptimer, Timer& vtimer, uint& communication)
 {
     Fr key, r_key;
     G1 com_key;
-    determineSeed(key, r_key, com_key, pp, ptimer, vtimer);
+    determineSeed(key, r_key, com_key, pp, ptimer, vtimer, communication);
 
     comp_timer.start();
     vector<Fr> rt_vec;
@@ -216,7 +227,9 @@ vector<bool> verifiableUniformBits(Polynomial& F, Polynomial& R, G1& com, const 
     commitLegendrePRNG(F_rt, F, R_rt, R, com_rt, com, pp);
     comp_timer.stop();
 
-    assert(proveLegendrePRNG(key, F_rt, F, r_key, R_rt, R, com_key, com_rt, com, pp, ptimer, vtimer));
+    communication += sizeof(G1);
+
+    assert(proveLegendrePRNG(key, F_rt, F, r_key, R_rt, R, com_key, com_rt, com, pp, ptimer, vtimer, communication));
 
     
 
