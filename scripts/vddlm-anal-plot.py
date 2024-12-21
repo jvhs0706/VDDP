@@ -10,9 +10,9 @@ if __name__ == "__main__":
     # plt.rcParams["font.family"] = "Liberation Serif"
     
     # 1 by 2 grid of plots
-    fig, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True, sharey=False, tight_layout=True)
+    fig, axs = plt.subplots(2, 1, figsize=(6, 5), sharex=True, sharey=False, tight_layout=True)
     # change names of algorithms
-    df['algorithm'] = df['algorithm'].replace({'bc23': 'BC23', 'ours': 'Ours'})
+    df['algorithm'] = df['algorithm'].replace({'bc23': 'VDBM', 'ours': 'VDDLM'})
 
     # plot eps vs num_bit for bc23 and ours
     sns.scatterplot(x = 'eps', y = 'num_coin', data = df, hue = 'algorithm', ax = axs[0])
@@ -29,6 +29,14 @@ if __name__ == "__main__":
     axs[1].set_xlabel('$\epsilon$', fontsize=15)
     axs[1].set_ylabel('L1 error', fontsize=15)
     axs[1].legend()
+
+    # # plot eps vs l1 for bc23 and ours
+    # sns.scatterplot(x = 'eps', y = 'l2', data = df, hue = 'algorithm', ax = axs[2])
+    # axs[2].set_xscale('log')
+    # axs[2].set_yscale('log')
+    # axs[2].set_xlabel('$\epsilon$', fontsize=15)
+    # axs[2].set_ylabel('L2 error', fontsize=15)
+    # axs[2].legend()
 
     plt.savefig('logs/vddlm-anal-plot.pdf', bbox_inches='tight')
 
