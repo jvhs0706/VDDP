@@ -8,20 +8,29 @@ if __name__ == '__main__':
     df = pd.read_csv('logs/vrr.csv')
     sns.set_theme(style="darkgrid")
 
+    df['prec'] = 2 ** df['log_prec']
+
     # plot (setup, committing, computing, proving, verifying) |vs inv_prec with error bar
-    plt.figure()
-    sns.lineplot(x = 'log_prec', y = 'setup', data = df, marker='o', label='Setup')
-    sns.lineplot(x = 'log_prec', y = 'committing', data = df, marker='o', label='Committing')
-    sns.lineplot(x = 'log_prec', y = 'computing', data = df, marker='o', label='Computing')
-    sns.lineplot(x = 'log_prec', y = 'proving', data = df, marker='o', label='Proving')
-    sns.lineplot(x = 'log_prec', y = 'verifying', data = df, marker='o', label='Verifying')
+    plt.figure(figsize=(6, 4))
+    sns.lineplot(x = 'prec', y = 'setup', data = df, marker='o', label='Setup')
+    sns.lineplot(x = 'prec', y = 'committing', data = df, marker='o', label='Committing')
+    sns.lineplot(x = 'prec', y = 'computing', data = df, marker='o', label='Computing')
+    sns.lineplot(x = 'prec', y = 'proving', data = df, marker='o', label='Proving')
+    sns.lineplot(x = 'prec', y = 'verifying', data = df, marker='o', label='Verifying')
     plt.legend()
 
+    # move the legend to the bottom
+
+    plt.legend(loc='lower center', bbox_to_anchor=(0.5, -0.35), ncol=3)
+
     # y axis in log scale
+    plt.xscale('log')
+    plt.gca().set_xticks([64, 128, 256, 512, 1024, 2048, 4096])
+    plt.gca().get_xaxis().set_major_formatter(plt.ScalarFormatter())
     plt.yscale('log')
 
     # x axis legend: precision bits
-    plt.xlabel('Precision bits')
+    plt.xlabel('$|\Omega|$')
 
     # y axis legend: time in seconds
     plt.ylabel('Time (s)')

@@ -15,15 +15,14 @@ int main(int argc, char** argv) {
     // initialize the random seed
     srand(time(NULL));
 
-    string i_file = argv[1];
-    string o_file = argv[2];
-    uint dim = stoi(argv[3]);
-    double eps = stod(argv[4]);
-    uint log_range = stoi(argv[5]);
-    uint prec = stoi(argv[6]);
+    uint dim = stoi(argv[1]);
+    string i_file = argv[2];
+    string o_file = argv[3];
+    string config_file = argv[4];
 
     Timer setup_timer, computing_timer;
     Timer ptimer, vtimer;
+    uint comm = 0;
 
     setup_timer.start();
     auto pp = LegendrePRNGTrustedSetup(dim);
@@ -35,6 +34,10 @@ int main(int argc, char** argv) {
     vector<int> counts(dim);
     loadbin(i_file, counts.data(), size);
 
+    vector<bool> z_config;
+    vector<vector<bool>> g_config;
+    readVDDLMConfig(config_file, z_config, g_config);
+
     computing_timer.start();
     Polynomial F_in = ntt_vec_to_poly_given_omega(vector<Fr>(counts.begin(), counts.end()), pp.omega_gen);
     Polynomial R_in = randomPolynomial(F_in.getDegree());
@@ -43,12 +46,12 @@ int main(int argc, char** argv) {
 
     Polynomial F_noise, R_noise;
     G1 com_noise;
-    vector<int> noise = DiscreteLaplacian(1.0L/eps, log_range, prec, pp, computing_timer, ptimer, vtimer, F_noise, R_noise, com_noise);
+    vector<int> noise = DiscreteLaplacianNew(z_config, g_config, pp, computing_timer, ptimer, vtimer, comm, F_noise, R_noise, com_noise);
 
     ptimer.start();
-    vtimer.start();
     Polynomial F_out = F_in + F_noise;
     Polynomial R_out = R_in + R_noise;
+    vtimer.start();
     G1 com_out = com_in + com_noise;
     vtimer.stop();
     vector<int> res(dim);
@@ -57,16 +60,21 @@ int main(int argc, char** argv) {
     }
     ptimer.stop();
 
+    comm += (sizeof(Fr) * dim * 2);
+
     // save the output, binary file
     savebin(o_file, res.data(), dim * sizeof(int));
 
     // check output matches
+    vtimer.start();
     assert(F_out == ntt_vec_to_poly_given_omega(vector<Fr>(res.begin(), res.end()), pp.omega_gen));
+    vtimer.stop();
 
     cout << "Setting time: " << setup_timer.getTotalTime() << " s\n";
     cout << "Computing time: " << computing_timer.getTotalTime() << " s\n";
     cout << "Proving time: " << ptimer.getTotalTime() << " s\n";
     cout << "Verifying time: " << vtimer.getTotalTime() << " s\n";
+    cout << "Communication: " << comm << " B\n";
 
     return 0;
 }

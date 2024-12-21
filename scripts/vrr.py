@@ -36,12 +36,12 @@ if __name__ == '__main__':
     
     if not os.path.isfile('logs/vrr.csv'):
         with open('logs/vrr.csv', 'w') as f:
-            f.write('eps,log_prec,num_class,actual_eps,setup,committing,computing,proving,verifying\n')
+            f.write('eps,log_prec,num_class,actual_eps,setup,committing,computing,proving,verifying,comm\n')
 
     
     log_str = f'{args.eps},{args.log_prec},{args.num_class},{actual_eps},'
     rts = [line.split(' ')[-2] for line in output_str.split('\n') if line]
-    assert(len(rts) == 5)
+    assert(len(rts) == 6)
     log_str += ','.join(rts)
     with open('logs/vrr.csv', 'a') as f:
         f.write(log_str + '\n')

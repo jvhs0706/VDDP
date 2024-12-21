@@ -37,29 +37,29 @@ bool verifyPolyEval(const Fr& y, const G1& proof, const G1& commitment, const Fr
 // Evaluating a public polynomial at a secret point
 bool SecretEval(const Fr& y, const Fr& ry, const Fr& x, const Fr& rx, const Polynomial& F, 
     const G1& com_y, const G1& com_x, const G1& com_F, 
-    const PubParam& pp, Timer& ptimer, Timer& vtimer);
+    const PubParam& pp, Timer& ptimer, Timer& vtimer, uint& communication);
 
 // Evaluating a secret polynomial at a public point
 bool EvalSecret(const Fr& y, const Fr& ry, const Fr& x, // secret y, public x
     const Polynomial& F, const Polynomial& R, // secret F, R
     const G1& com_y, const G1& com_F, 
-    const PubParam& pp, Timer& ptimer, Timer& vtimer);
+    const PubParam& pp, Timer& ptimer, Timer& vtimer, uint& communication);
 
 bool Equal(const Fr& x, const Fr& r_x, const Fr& y, const Fr& r_y, 
     const G1& com_x, const G1& com_y, const G1& g, const G1& h,
-    Timer& ptimer, Timer& vtimer);
+    Timer& ptimer, Timer& vtimer, uint& communication);
 
 // z == x * y
 bool Prod(const Fr& z, const Fr& r_z, const Fr& x, const Fr& r_x, const Fr& y, const Fr& r_y,
     const G1& com_z, const G1& com_x, const G1& com_y, const G1& g, const G1& h,
-    Timer& ptimer, Timer& vtimer);
+    Timer& ptimer, Timer& vtimer, uint& communication);
 
 //The followings are for the batched versions
 
 bool Binary(const Polynomial& F, const Polynomial& R, 
     const uint len, const Fr& omega, 
     const G1& com_F, const PubParam& pp, 
-    Timer& ptimer, Timer& vtimer);
+    Timer& ptimer, Timer& vtimer, uint& communication);
 
 bool Hadamard(const Polynomial& Fc, const Polynomial& Rc, 
     const Polynomial& Fa, const Polynomial& Ra,
@@ -67,7 +67,7 @@ bool Hadamard(const Polynomial& Fc, const Polynomial& Rc,
     const uint len, const Fr& omega,
     const G1& com_Fc, const G1& com_Fa, const G1& com_Fb,
     const PubParam& pp,
-    Timer& ptimer, Timer& vtimer);
+    Timer& ptimer, Timer& vtimer, uint& communication);
 
 bool Mux(const Polynomial& Fs, const Polynomial& Rs, // selector
     const Polynomial& Fa, const Polynomial& Ra,
@@ -76,6 +76,6 @@ bool Mux(const Polynomial& Fs, const Polynomial& Rs, // selector
     const uint len, const Fr& omega,
     const G1& com_Fs, const G1& com_Fa, const G1& com_Fb, const G1& com_Fout,
     const PubParam& pp,
-    Timer& ptimer, Timer& vtimer);
+    Timer& ptimer, Timer& vtimer, uint& communication);
 
 #endif // PROOF_HPP
