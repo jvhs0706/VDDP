@@ -10,7 +10,7 @@ if __name__ == "__main__":
     # plt.rcParams["font.family"] = "Liberation Serif"
     
     # 1 by 2 grid of plots
-    fig, axs = plt.subplots(2, 1, figsize=(6, 5), sharex=True, sharey=False, tight_layout=True)
+    fig, axs = plt.subplots(1, 2, figsize=(8, 3), sharex=True, sharey=False, tight_layout=True)
     # change names of algorithms
     df['algorithm'] = df['algorithm'].replace({'bc23': 'VDBM', 'ours': 'VDDLM'})
 
