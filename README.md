@@ -16,4 +16,4 @@ Note: The environment is named "VDP" instead of "VDDP" to accommodate generic ve
 
 To reproduce the results of VDDLM (Figure 5 and Table 2), execute `scripts/vddlm-anal.sh` and `scripts/vddlm.sh`. We use [VDBM (BC23)](https://github.com/abiswas3/Verifiable-Differential-Privacy) as the baseline.
 
-To reproduce the results of VRR (Table 3 and Figure 7), execute `scripts/vrr.sh`. We use [KCY21]() as the baseline.
+To reproduce the results of VRR (Table 3 and Figure 7), execute `scripts/vrr.sh`. We use [KCY21](https://github.com/FumiyukiKato/verifiable-ldp) as the baseline.
