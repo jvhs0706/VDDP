@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
     df = pd.read_csv('logs/vddlm-anal.csv')
 
-    sns.set_theme(style="darkgrid")
+    sns.set_theme(style="whitegrid")
     # plt.rcParams["font.family"] = "Liberation Serif"
     
     # 1 by 2 grid of plots
@@ -15,20 +15,20 @@ if __name__ == "__main__":
     df['algorithm'] = df['algorithm'].replace({'bc23': 'VDBM', 'ours': 'VDDLM'})
 
     # plot eps vs num_bit for bc23 and ours
-    sns.scatterplot(x = 'eps', y = 'num_coin', data = df, hue = 'algorithm', ax = axs[0])
-    axs[0].set_xscale('log')
-    axs[0].set_yscale('log')
-    axs[0].set_xlabel('$\epsilon$', fontsize=15)
-    axs[0].set_ylabel('Number of coins', fontsize=15)
-    axs[0].legend()
-    
-    # plot eps vs l1 for bc23 and ours
-    sns.scatterplot(x = 'eps', y = 'l1', data = df, hue = 'algorithm', ax = axs[1])
+    sns.scatterplot(x = 'eps', y = 'num_coin', data = df, hue = 'algorithm', style = 'algorithm', ax = axs[1], markers = ['o', 'P'], s=100)
     axs[1].set_xscale('log')
     axs[1].set_yscale('log')
     axs[1].set_xlabel('$\epsilon$', fontsize=15)
-    axs[1].set_ylabel('L1 error', fontsize=15)
+    axs[1].set_ylabel('Number of coins', fontsize=15)
     axs[1].legend()
+    
+    # plot eps vs l1 for bc23 and ours
+    sns.scatterplot(x = 'eps', y = 'l1', data = df, hue = 'algorithm', style = 'algorithm', ax = axs[0], markers = ['o', 'P'], s=100)
+    axs[0].set_xscale('log')
+    axs[0].set_yscale('log')
+    axs[0].set_xlabel('$\epsilon$', fontsize=15)
+    axs[0].set_ylabel('L1 error', fontsize=15)
+    axs[0].legend()
 
     # # plot eps vs l1 for bc23 and ours
     # sns.scatterplot(x = 'eps', y = 'l2', data = df, hue = 'algorithm', ax = axs[2])

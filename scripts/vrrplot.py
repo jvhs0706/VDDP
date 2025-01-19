@@ -6,17 +6,17 @@ import pandas as pd
 
 if __name__ == '__main__':
     df = pd.read_csv('logs/vrr.csv')
-    sns.set_theme(style="darkgrid")
+    sns.set_theme(style="whitegrid")
 
     df['prec'] = 2 ** df['log_prec']
 
     # plot (setup, committing, computing, proving, verifying) |vs inv_prec with error bar
     plt.figure(figsize=(8, 4))
-    sns.lineplot(x = 'prec', y = 'setup', data = df, marker='o', label='Setup')
-    sns.lineplot(x = 'prec', y = 'committing', data = df, marker='o', label='Committing')
-    sns.lineplot(x = 'prec', y = 'computing', data = df, marker='o', label='Computing')
-    sns.lineplot(x = 'prec', y = 'proving', data = df, marker='o', label='Proving')
-    sns.lineplot(x = 'prec', y = 'verifying', data = df, marker='o', label='Verifying')
+    sns.lineplot(x = 'prec', y = 'setup', data = df, marker='o', label='Setup', markersize=10)
+    sns.lineplot(x = 'prec', y = 'committing', data = df, marker='X', label='Committing', markersize=10)
+    sns.lineplot(x = 'prec', y = 'computing', data = df, marker='s', label='Computing', markersize=10)
+    sns.lineplot(x = 'prec', y = 'proving', data = df, marker='P', label='Proving', markersize=10)
+    sns.lineplot(x = 'prec', y = 'verifying', data = df, marker='D', label='Verifying', markersize=10)
     plt.legend()
 
     # move the legend to the bottom
