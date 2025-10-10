@@ -1,4 +1,3 @@
-name: VDP_ENV
 channels:
   - conda-forge
   - defaults
