@@ -15,7 +15,7 @@ assignees: ""
 
 ## 2. Environment Details (Optional)
 
-Please describe your hardware and software environment if applicable.
+Please describe your hardware and software environment, if applicable.
 
 > _e.g., 64 GB RAM, Ubuntu 22.04, etc._
 
@@ -25,11 +25,12 @@ Please describe your hardware and software environment if applicable.
 
 Please check the box that applies and elaborate as needed.
 
-- [ ] ✅ I confirm that I successfully reproduced the reported results (within acceptable variation), and my findings support the paper’s conclusions.  
-- [ ] ❌ I encountered discrepancies or was unable to reproduce the results.  
+- [ ] ✅ I confirm that I successfully reproduced the reported results (within acceptable variation), and my findings are consistent with the paper’s conclusions.
 
-**If discrepancies were found, please briefly describe them below:**  
-> _e.g., Deviations in accuracy, convergence issues, runtime differences, etc._
+**If you observed any differences or anomalies, please describe them below:**  
+> _e.g., minor deviations in accuracy, runtime, or resource usage._
+
+_(Note: Differences are common across hardware and environments — please focus on qualitative trends and reproducibility within expected variation.)_
 
 ---
 
