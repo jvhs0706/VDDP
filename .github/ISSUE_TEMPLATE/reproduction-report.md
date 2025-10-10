@@ -11,15 +11,11 @@ assignees: ""
 **Link to your fork:**  
 [Paste your forked repository URL here]
 
----
-
 ## 2. Environment Details (Optional)
 
 Please describe your hardware and software environment, if applicable.
 
 > _e.g., 64 GB RAM, Ubuntu 22.04, etc._
-
----
 
 ## 3. Reproduction Outcome
 
@@ -32,13 +28,9 @@ Please check the box that applies and elaborate as needed.
 
 _(Note: Differences are common across hardware and environments — please focus on qualitative trends and reproducibility within expected variation.)_
 
----
-
 ## 4. Additional Comments (Optional)
 
 > _Any suggestions, insights, or notable implementation details you would like to share._
-
----
 
 ## 5. Contributor Information
 
