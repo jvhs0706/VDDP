@@ -6,15 +6,28 @@ Welcome to the official implementation of [VDDP](https://arxiv.org/abs/2504.2175
 
 Please follow the steps below carefully to reproduce the experimental results.
 
----
-
 ### Step 0: Fork (and star) this repository
 
 This repository is designed to automatically generate raw experimental logs.
 If you do **not** fork the repository, the code will attempt to push your logs to the original repository, which may fail or interfere with existing data.
-To avoid this, please **fork** the repository before running any experiments. (A star is appreciated, too!)
 
----
+To get started:
+
+1. **Fork** this repository on GitHub (a star is appreciated!).
+2. **Clone your fork locally**:
+
+```bash
+git clone --recurse-submodules <your-fork-url>
+cd VDDP
+```
+
+3. If you already cloned without `--recurse-submodules`, initialize and update the submodule separately:
+
+```bash
+git submodule update --init --recursive
+```
+
+Following these steps ensures that all repository components, including submodules, are correctly set up before running experiments.
 
 ### Step 1: Set up the environment
 
@@ -24,8 +37,6 @@ To create and activate the Conda environment, run:
 conda env create --name VDDP_REPRODUCTION_ENV --file environment.yml
 conda activate VDDP_REPRODUCTION_ENV
 ```
-
----
 
 ### Step 2: Run the reproduction scripts
 
@@ -53,8 +64,6 @@ sbatch scripts/vrr.sh
 sbatch scripts/vddgm.sh
 ```
 
----
-
 ### Step 3: Generate the plots
 
 To (re)generate all plots, run:
@@ -62,8 +71,6 @@ To (re)generate all plots, run:
 ```bash
 ./scripts/plot.sh
 ```
-
----
 
 ### Step 4: Submit your reproduction report
 
