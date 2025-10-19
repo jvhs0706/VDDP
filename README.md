@@ -17,8 +17,8 @@ To get started:
 2. **Clone your fork locally**:
 
 ```bash
-git clone --recurse-submodules <your-fork-url>
-cd VDDP
+git clone --recurse-submodules <your-fork-url> VDDP-reproduction
+cd VDDP-reproduction
 ```
 
 3. If you already cloned without `--recurse-submodules`, initialize and update the submodule separately:

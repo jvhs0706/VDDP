@@ -11,15 +11,18 @@ sns.set_style('whitegrid')  # or 'darkgrid', 'white', 'dark', etc.
 
 # ---- Font Size Settings ----
 plt.rcParams.update({
-    'font.size': 15,
-    'axes.labelsize': 20,
-    'axes.titlesize': 20,
-    'xtick.labelsize': 15,
-    'ytick.labelsize': 15,
-    'legend.fontsize': 20,
-    'figure.titlesize': 25,
+    'font.size': 20,
+    'axes.labelsize': 25,
+    'axes.titlesize': 25,
+    'xtick.labelsize': 20,
+    'ytick.labelsize': 20,
+    'legend.fontsize': 25,
+    'figure.titlesize': 30,
     'lines.markersize': 10,   # default marker size
     'lines.linewidth': 3,     # default line width
+    'mathtext.fontset': 'stix',
+    'font.family': 'serif',
+    'font.serif': ['Times New Roman'],
 })
 
 if __name__ == '__main__':
@@ -39,7 +42,7 @@ if __name__ == '__main__':
 
     # move the legend to the bottom
 
-    plt.legend(loc='lower center', bbox_to_anchor=(0.475, -0.35), ncol=5)
+    plt.legend(loc='lower center', bbox_to_anchor=(0.475, -0.4), ncol=5)
 
     # y axis in log scale
     plt.xscale('log')

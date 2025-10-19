@@ -6,18 +6,21 @@ from matplotlib.colors import LogNorm
 
 sns.set_palette('bright')
 sns.set_style('whitegrid')
-sns.set_theme(style="whitegrid")
+# sns.set_theme(style="whitegrid")
 
-sns.set_context("notebook", rc={
-    'font.size': 15,
-    'axes.labelsize': 20,
-    'axes.titlesize': 20,
-    'xtick.labelsize': 15,
-    'ytick.labelsize': 15,
-    'legend.fontsize': 20,
-    'figure.titlesize': 25,
+plt.rcParams.update({
+    'font.size': 20,
+    'axes.labelsize': 25,
+    'axes.titlesize': 25,
+    'xtick.labelsize': 20,
+    'ytick.labelsize': 20,
+    'legend.fontsize': 25,
+    'figure.titlesize': 30,
     'lines.markersize': 10,
-    'lines.linewidth': 3
+    'lines.linewidth': 3,
+    'mathtext.fontset': 'stix',
+    'font.family': 'serif',
+    'font.serif': ['Times New Roman'],
 })
 
 if __name__ == "__main__":
@@ -76,6 +79,6 @@ if __name__ == "__main__":
 
     handles, labels = axs[0].get_legend_handles_labels()
     labels = [f'$d={label}$' for label in labels]
-    fig.legend(handles, labels, loc='lower center', ncol=4, bbox_to_anchor=(0.5, -0.05))
+    fig.legend(handles, labels, loc='lower center', ncol=4, bbox_to_anchor=(0.5, -0.06))
 
     plt.savefig('plots/vddgm.pdf', bbox_inches='tight')

@@ -12,15 +12,18 @@ sns.set_style('whitegrid')  # or 'darkgrid', 'white', 'dark', etc.
 
 # ---- Font Size Settings ----
 plt.rcParams.update({
-    'font.size': 15,
-    'axes.labelsize': 20,
-    'axes.titlesize': 20,
-    'xtick.labelsize': 15,
-    'ytick.labelsize': 15,
-    'legend.fontsize': 20,
-    'figure.titlesize': 25,
+    'font.size': 20,
+    'axes.labelsize': 25,
+    'axes.titlesize': 25,
+    'xtick.labelsize': 20,
+    'ytick.labelsize': 20,
+    'legend.fontsize': 25,
+    'figure.titlesize': 30,
     'lines.markersize': 10,   # default marker size
-    'lines.linewidth': 3     # default line width
+    'lines.linewidth': 3,     # default line width
+    'mathtext.fontset': 'stix',
+    'font.family': 'serif',
+    'font.serif': ['Times New Roman'],
 })
 
 
@@ -108,7 +111,7 @@ if __name__ == '__main__':
 
     # --- Legend ---
     handles, labels = axs[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='lower center', ncol=5, bbox_to_anchor=(0.5, -0.18))
+    fig.legend(handles, labels, loc='lower center', ncol=5, bbox_to_anchor=(0.5, -0.2))
 
     plt.tight_layout()
     plt.savefig('plots/vddlm.pdf', format='pdf', bbox_inches='tight')

@@ -9,7 +9,9 @@ if __name__ == "__main__":
     df = pd.read_csv(f'logs/{sys.argv[1]}.csv')
 
     sns.set_theme(style="whitegrid")
-    # plt.rcParams["font.family"] = "Liberation Serif"
+    plt.rcParams.update({'mathtext.fontset': 'stix',
+        'font.family': 'serif',
+        'font.serif': ['Times New Roman']})
     
     # 1 by 2 grid of plots
     fig, axs = plt.subplots(1, 2, figsize=(8, 3), sharex=True, sharey=False, tight_layout=True)
