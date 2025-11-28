@@ -8,7 +8,12 @@
 #SBATCH --output=logs/vrr-%N-%j.out
 #SBATCH --error=logs/vrr-%N-%j.err
 
-source activate ~/.conda/envs/VDP_ENV
+# Ensure current environment is VDDP_ENV
+CURRENT_ENV=$(conda info --json | jq -r '.active_prefix_name')
+if [ "$CURRENT_ENV" != "VDDP_ENV" ]; then
+    echo "Please activate the VDDP_ENV conda environment before running this script."
+    exit 1
+fi
 
 if [ ! -d "build" ]; then
     mkdir build

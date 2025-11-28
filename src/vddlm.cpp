@@ -152,7 +152,7 @@ vector<uint> Geometric(double p, uint log_range, uint prec, const LegendrePRNGPu
 
         comp_timer.start();
         for_each(
-            std::execution::par,
+            // std::execution::par,
             res.begin(),
             res.end(),
             [&](uint& j)
@@ -227,7 +227,7 @@ vector<uint> GeometricNew(const vector<vector<bool>>& config, const LegendrePRNG
 
         comp_timer.start();
         for_each(
-            std::execution::par,
+            // std::execution::par,
             res.begin(),
             res.end(),
             [&](uint& j)

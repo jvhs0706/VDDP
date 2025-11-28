@@ -8,10 +8,10 @@ add_library(vddlm_lib vddlm.hpp vddlm.cpp)
 add_library(vddgm_lib vddgm.hpp vddgm.cpp)
 
 add_executable(vrr main-vrr.cpp)
-target_link_libraries(vrr vrr_lib vdp_lib mcl mclbn384_256 TBB::tbb)
+target_link_libraries(vrr vrr_lib vdp_lib mcl mclbn384_256)
 
 add_executable(vddlm main-vddlm.cpp)
-target_link_libraries(vddlm vddlm_lib vdp_lib mcl mclbn384_256 TBB::tbb)
+target_link_libraries(vddlm vddlm_lib vdp_lib mcl mclbn384_256)
 
 add_executable(vddgm main-vddgm.cpp)
-target_link_libraries(vddgm vddgm_lib vddlm_lib vdp_lib mcl mclbn384_256 TBB::tbb)
+target_link_libraries(vddgm vddgm_lib vddlm_lib vdp_lib mcl mclbn384_256)

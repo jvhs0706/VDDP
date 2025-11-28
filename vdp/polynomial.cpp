@@ -73,7 +73,7 @@ Polynomial Polynomial::operator*(const Polynomial& other) const {
 
     vector<Fr> result_ntt(ntt_size);
     for_each(
-        std::execution::par,
+        // std::execution::par,
         result_ntt.begin(),
         result_ntt.end(),
         [&](Fr& v)
@@ -85,7 +85,7 @@ Polynomial Polynomial::operator*(const Polynomial& other) const {
 
     auto resultCoefficients = ntt_helper(result_ntt, 1 / omega);
     for_each(
-        std::execution::par,
+        // std::execution::par,
         resultCoefficients.begin(),
         resultCoefficients.end(),
         [&](Fr& v)
