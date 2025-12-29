@@ -4,6 +4,7 @@ channels:
   - defaults
 dependencies:
   - cmake=3.26.4
+  - gmp=6.2.1
   - matplotlib=3.8.4
   - numpy=1.26.4
   - pandas=2.2.2

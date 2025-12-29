@@ -11,14 +11,7 @@
 #!/bin/bash
 set -e
 scripts/check-conda-env.sh
-
-if [ ! -d "build" ]; then
-    mkdir build
-fi
-cd build
-cmake ..
-make
-cd ..
+scripts/build.sh
 
 LOG_FILE="logs/vddgm.csv"
 

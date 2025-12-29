@@ -10,14 +10,7 @@
 
 #!/bin/bash
 scripts/check-conda-env.sh
-
-if [ ! -d "build" ]; then
-    mkdir build
-fi
-cd build
-cmake ..
-make
-cd ..
+scripts/build.sh
 
 NUM_REPEAT=10
 
