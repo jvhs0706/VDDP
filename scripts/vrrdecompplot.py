@@ -16,7 +16,7 @@ plt.rcParams.update({
     'axes.titlesize': 25,
     'xtick.labelsize': 20,
     'ytick.labelsize': 20,
-    'legend.fontsize': 25,
+    'legend.fontsize': 20,
     'figure.titlesize': 30,
     'lines.markersize': 10,   # default marker size
     'lines.linewidth': 3,     # default line width
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     df['prec'] = 2 ** df['log_prec']
 
     # plot (setup, committing, computing, proving, verifying) |vs inv_prec with error bar
-    plt.figure(figsize=(20, 7))
+    plt.figure(figsize=(15, 8))
     sns.lineplot(x = 'prec', y = 'setup', data = df, marker='o', label='Setup', markersize=10)
     sns.lineplot(x = 'prec', y = 'committing', data = df, marker='X', label='Committing', markersize=10)
     sns.lineplot(x = 'prec', y = 'computing', data = df, marker='s', label='Computing', markersize=10)
@@ -41,8 +41,7 @@ if __name__ == '__main__':
     plt.legend()
 
     # move the legend to the bottom
-
-    plt.legend(loc='lower center', bbox_to_anchor=(0.475, -0.3), ncol=5)
+    plt.legend(loc='lower center', bbox_to_anchor=(0.5, -0.225), ncol=5)
 
     # y axis in log scale
     plt.xscale('log')
