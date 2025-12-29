@@ -10,7 +10,7 @@
 
 #!/bin/bash
 set -e
-./check-conda-env.sh
+scripts/check-conda-env.sh
 
 if [ ! -d "build" ]; then
     mkdir build

@@ -10,7 +10,7 @@
 
 #!/bin/bash
 set -e
-./check-conda-env.sh
+scripts/check-conda-env.sh
 
 LOG_FILE="logs/vddlm-anal.csv"
 

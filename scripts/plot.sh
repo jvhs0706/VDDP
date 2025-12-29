@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-./check-conda-env.sh
+scripts/check-conda-env.sh
 
 python scripts/vddlm-anal-plot.py vddlm-anal
 python scripts/vddlmplot.py vddlm external-vdbm
