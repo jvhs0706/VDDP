@@ -32,7 +32,7 @@ if __name__ == '__main__':
     df['prec'] = 2 ** df['log_prec']
 
     # plot (setup, committing, computing, proving, verifying) |vs inv_prec with error bar
-    plt.figure(figsize=(15, 5))
+    plt.figure(figsize=(20, 7))
     sns.lineplot(x = 'prec', y = 'setup', data = df, marker='o', label='Setup', markersize=10)
     sns.lineplot(x = 'prec', y = 'committing', data = df, marker='X', label='Committing', markersize=10)
     sns.lineplot(x = 'prec', y = 'computing', data = df, marker='s', label='Computing', markersize=10)
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # move the legend to the bottom
 
-    plt.legend(loc='lower center', bbox_to_anchor=(0.475, -0.4), ncol=5)
+    plt.legend(loc='lower center', bbox_to_anchor=(0.475, -0.3), ncol=5)
 
     # y axis in log scale
     plt.xscale('log')

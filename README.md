@@ -34,8 +34,7 @@ Following these steps ensures that all repository components, including submodul
 To create and activate the Conda environment, run:
 
 ```bash
-conda env create --file env.yaml
-conda activate VDDP_ENV
+conda env create --file env-reproduce.yaml && conda activate VDDP_ENV
 ```
 
 ### Step 2: Run the reproduction scripts
