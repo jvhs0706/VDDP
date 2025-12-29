@@ -9,7 +9,6 @@
 #SBATCH --error=logs/vrr-%N-%j.err
 
 #!/bin/bash
-set -e
 scripts/check-conda-env.sh
 
 if [ ! -d "build" ]; then
