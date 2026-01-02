@@ -127,8 +127,8 @@ if __name__ == '__main__':
     sns.lineplot(data=vddlm_df, x='orig_eps', y='vdbm_l1', label='DBM/VDBM (expectation)', marker='s', linestyle='--', errorbar = None)
     sns.lineplot(data=vddlm_df, x='eps', y='l1', label='VDDLM', marker='^', linestyle='-')
     ax.set_xscale('log')
-    ax.set_yscale('symlog', linthresh=10**1.5, linscale=5)  # use symlog for better visibility of small values
-    # ax.set_yscale('log')
+    # ax.set_yscale('symlog', linthresh=10**1.5, linscale=5)  # use symlog for better visibility of small values
+    ax.set_yscale('log')
     ax.set_ylim(bottom=0)  # prevent showing negatives
     ax.set_xlabel('$\epsilon$')
     ax.set_ylabel('L1 Error\n(Per-Dimension)')
