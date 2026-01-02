@@ -105,7 +105,7 @@ if __name__ == '__main__':
 
     # --- Plot each metric ---
     for ax, metric, ylabel, logabove in zip(axs, ['prover', 'comm', 'verifier'],
-                                ["Servers' RT (s)", 'Communication (MB)', "Verifier's RT (s)"], [None, 10, 100]):
+                                ["Servers' RT (s)", 'Communication (MB)', "Verifier's RT (s)"], [None, 5, 30]):
         ax_data = regather_data(vddlm_df, vdbm_df, metric)
         plot_metric(ax, ax_data, metric, ylabel, logabove)
 
