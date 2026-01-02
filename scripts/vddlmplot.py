@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
 
     # Another plot for L1 error
-    fig, ax = plt.subplots(figsize=(12, 4))
+    fig, ax = plt.subplots(figsize=(12, 5))
     # plot three lines
     vddlm_df['orig_l1'] /= vddlm_df['dim']
     vddlm_df['vdbm_l1'] /= vddlm_df['dim']
