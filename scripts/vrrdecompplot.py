@@ -43,6 +43,8 @@ if __name__ == '__main__':
     # move the legend to the bottom
     plt.legend(loc='lower center', bbox_to_anchor=(0.5, -0.225), ncol=5)
 
+    
+
     # y axis in log scale
     plt.xscale('log')
     plt.gca().set_xticks([64, 128, 256, 512, 1024, 2048, 4096])

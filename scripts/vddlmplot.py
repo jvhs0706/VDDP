@@ -134,7 +134,7 @@ if __name__ == '__main__':
     ax.set_ylabel('L1 Error\n(Per-Dimension)')
     ax.set_xticks(xticks)
     ax.set_xticklabels(xtick_labels)
-    ax.legend(loc='lower left')
+    ax.legend(loc='lower left', fontsize=20)
     plt.tight_layout()
     plt.savefig('plots/vddlm-l1.pdf', format='pdf', bbox_inches='tight')
 

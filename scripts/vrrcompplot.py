@@ -123,6 +123,9 @@ if __name__ == '__main__':
         )
         legend_patches.append(patch)
 
+    # reorder the legend entries, 
+    legend_patches = [legend_patches[i] for i in [0, 3, 1, 4, 2, 5]]
+
     fig.legend(handles=legend_patches, loc='lower center', ncol=3, bbox_to_anchor=(0.5, -0.1))
 
 
