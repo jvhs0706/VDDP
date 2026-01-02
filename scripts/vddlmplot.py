@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
         ax.set_xscale('log')
         if logabove is not None:
-            ax.set_yscale('symlog', linthresh=logabove, linscale=10)
+            ax.set_yscale('symlog', linthresh=logabove, linscale=5)
             ax.set_ylim(bottom=0)  # prevent showing negatives
         else:
             ax.set_yscale('log')
