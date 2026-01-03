@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     # --- Plot each metric ---
     for ax, metric, ylabel in zip(axs, ['client', 'comm', 'verifier'],
-                                ["Client's RT (s)", 'Communication (MB)', "Verifier's RT (s)"]):
+                                ["Client RT (s)", 'Communication (MB)', "Verifier RT (s)"]):
         ax_data = regather_data(ours_df, kcy21_df, metric)
         plot_metric(ax, ax_data, metric, ylabel)
 
