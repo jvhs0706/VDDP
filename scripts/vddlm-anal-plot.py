@@ -23,7 +23,7 @@ if __name__ == "__main__":
     axs[1].set_xscale('log')
     axs[1].set_yscale('log')
     axs[1].set_xlabel('$\epsilon$', fontsize=15)
-    axs[1].set_ylabel('Number of coins', fontsize=15)
+    axs[1].set_ylabel('Number of Coins', fontsize=15)
     axs[1].legend()
     
     # plot eps vs l1 for bc23 and ours
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     axs[0].set_xscale('log')
     axs[0].set_yscale('log')
     axs[0].set_xlabel('$\epsilon$', fontsize=15)
-    axs[0].set_ylabel('L1 error', fontsize=15)
+    axs[0].set_ylabel('L1 Error', fontsize=15)
     axs[0].legend()
 
     # # plot eps vs l1 for bc23 and ours

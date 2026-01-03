@@ -43,7 +43,7 @@ if __name__ == "__main__":
     axs[0].set_xticks(xticks)
     axs[0].set_xticklabels(xtick_labels)
     axs[0].set_xlabel('$\sigma$')
-    axs[0].set_ylabel('Servers\' RT (s)')
+    axs[0].set_ylabel('Server RT (s)')
 
     
 
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     axs[2].set_xticks(xticks)
     axs[2].set_xticklabels(xtick_labels)
     axs[2].set_xlabel('$\sigma$')
-    axs[2].set_ylabel('Verifier\'s RT (s)')
+    axs[2].set_ylabel('Verifier RT (s)')
 
     sns.lineplot(x='sigma', y='l1', data=df, style='dim', hue='dim', hue_norm=LogNorm(),
                  ax=axs[3], markers=True, dashes=True)
