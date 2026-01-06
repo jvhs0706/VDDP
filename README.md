@@ -1,3 +1,5 @@
+<meta name="robots" content="noindex">
+
 # VDDP: Verifiable Distributed Differential Privacy
 
 Welcome to the official implementation of [VDDP](https://arxiv.org/abs/2504.21752).
