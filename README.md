@@ -2,7 +2,7 @@
 
 # VDDP: Verifiable Distributed Differential Privacy
 
-Welcome to the official implementation of [VDDP](https://arxiv.org/abs/2504.21752).
+Welcome to the official implementation of VDDP.
 
 ## Reproduction Instructions
 
@@ -73,7 +73,3 @@ To (re)generate all plots, run:
 ./scripts/plot.sh
 ```
 
-### Step 4: Submit your reproduction report
-
-Once you have completed your reproduction, please [open a new issue using the *Reproduction Report* template](https://github.com/jvhs0706/VDDP/issues/new?template=reproduction-report.md).
-Proper attribution will be provided for all submitted reports.
